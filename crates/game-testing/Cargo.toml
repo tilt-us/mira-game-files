@@ -1,0 +1,14 @@
+[package]
+name = "game-testing"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dev-dependencies.game-shared]
+path = "../game-shared"
+
+[dev-dependencies.bevy_input]
+workspace = true

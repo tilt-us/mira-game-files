@@ -1,0 +1,74 @@
+[workspace]
+members = [
+  "apps/game-client",
+  "crates/game-shared",
+  "crates/game-client-package",
+  "crates/game-testing",
+]
+
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
+
+##################################################
+#                  Dependencies                  #
+##################################################
+
+# Main dependency for engine stuff. Bevy is used in all crates for handled
+#  game-related stuff. Note update this dependency is havey impact on the complete project!
+[workspace.dependencies.bevy]
+version = "0.18.1"
+default-features = false
+features = [
+  "bevy_asset",
+  "bevy_log",
+  "multi_threaded"
+]
+
+# Bevy seperated input crate for ci testing. (bevy_winit can't be work on ci pipelines!)
+[workspace.dependencies.bevy_input]
+version = "0.18.1"
+features = [
+  "keyboard"
+]
+
+# Dependency for handle ['.toml'] files.
+[workspace.dependencies.toml]
+version = "1.1.2"
+default-features = false
+features = [
+  "serde",
+  "parse"
+]
+
+# Dependency for handle Serialize and Deserialize.
+# Note this is only the function not ready for JSON or TOML.
+[workspace.dependencies.serde]
+version = "1.0.228"
+features = ["derive"]
+
+# Dependency for extends ['serde'] for handle JSON files.
+[workspace.dependencies.serde_json]
+version = "1.0.149"
+
+##################################################
+#                    Profiles                    #
+##################################################
+
+[profile.release]
+panic = "unwind"
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 1
+incremental = false
+
+[profile.dev.package."*"]
+opt-level = 3
+debug = true

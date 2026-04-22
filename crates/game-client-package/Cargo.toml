@@ -1,0 +1,27 @@
+[package]
+name = "game-client-package"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies.game-shared]
+path = "../game-shared"
+
+[dependencies.bevy]
+workspace = true
+features = [
+    "bevy_state",
+    "bevy_window"
+]
+
+[dependencies.serde]
+workspace = true
+
+[dependencies.toml]
+workspace = true
+features = [
+    "display"
+]

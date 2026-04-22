@@ -1,0 +1,18 @@
+# Rust/Cargo
+/target/
+
+# IDE
+/.idea/
+/.claude/
+
+# Runtime generated
+/logs/
+/saves/
+/worlds/
+/dist/
+benchmark-*.txt
+server.settings.toml
+
+# OS
+.DS_Store
+Thumbs.db

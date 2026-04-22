@@ -1,0 +1,73 @@
+# Examples for inputs:
+# - More than one input -> (A | B) <-- | mean or.
+# - Combo keys -> (F3 + C) -> + means you need to Hit and hold F3 and then hit the other one.
+
+#############################################################################
+#                                                                           #
+#                              Movement Section                             #
+#                                                                           #
+#############################################################################
+
+# Player move forward Key (Default W)
+movement_forward = "W"
+
+# Player move backward Key (Default S)
+movement_backward = "S"
+
+# Player move left Key (Default A)
+movement_left = "A"
+
+# Player move right Key (Default D)
+movement_right = "D"
+
+# Player jump Key (Default Space)
+movement_jump = "Space"
+
+# Player sprint Key (Default ShiftLeft)
+movement_sprint = "ShiftLeft"
+
+# Player sneak Key (Default CtrlLeft)
+movement_sneak = "CtrlLeft"
+
+# Camera Rotation speed for vertical and horizontal movement (yaw | pitch). (Default both: 1.0)
+mouse_sensitivity_vertical = 1.0
+mouse_sensitivity_horizontal = 1.0
+
+#############################################################################
+#                                                                           #
+#                            Interaction Section                            #
+#                                                                           #
+#############################################################################
+
+# Player interact with entites or blocks. (Block Place is the same) (Default F)
+interact = "F"
+
+# Open pause menu (Default Escape)
+open_menu = "Escape"
+
+# Player attack entities. (Block Break is the same) (Default MouseLeft)
+attack = "MouseLeft"
+
+#############################################################################
+#                                                                           #
+#                                 Ui Section                                #
+#                                                                           #
+#############################################################################
+
+# Key to close current open inventories (Default Escape)
+close_active_ui = "Escape"
+
+#############################################################################
+#                                                                           #
+#                               Debug Section                               #
+#                                                                           #
+#############################################################################
+
+# Open the system screen at a transparent layer. (Default F3)
+system_info_screen = "F3"
+
+# Shows in the world near colliders (Blocks, Entities) (Default F3 + C)
+debug_collider = "F3 + C"
+
+# Start / End a benchmark for test the game performance. (Default F3 + B)
+benchmark_start_stop = "F3 + B"

@@ -1,0 +1,21 @@
+[package]
+name = "game-client"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "game-client"
+path = "src/main.rs"
+
+[dependencies.game-client-package]
+path = "../../crates/game-client-package"
+
+[dependencies.bevy]
+workspace = true
+features = [
+    "bevy_winit",
+    "bevy_core_pipeline",
+    "x11",
+    "wayland"
+]

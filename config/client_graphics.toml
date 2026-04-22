@@ -1,0 +1,42 @@
+#############################################################################
+#                                                                           #
+#                               Window Section                              #
+#                                                                           #
+#############################################################################
+
+# Window size at startup.
+# Impact: larger resolution costs GPU time and can reduce FPS.
+window_width = 1270
+window_height = 720
+
+# Fullscreen toggle.
+# Impact: fullscreen can improve presentation stability depending on the driver / OS.
+fullscreen = false
+
+# Vertical sync.
+# Valid formats:
+# - Vsync | true > enable vsync.
+# - NoVsync | false -> disabled vsync
+# - Fifo | default | blank -> bevy default mode.
+# - FifoRelaxed -> means Adaptive Vsync.
+# - Immediate -> same like NoVsync or false. But it is not implemented for any hardware!
+# - Mailbox -> means Fast Vsync (Windows | Linux) (NVIDIA)
+# Impact: it reduces tearing; can increase input latency and cap FPS.
+vsync = "default"
+
+# Rendering backend selection (AUTO, VULKAN, DX12, etc.).
+# Supported:
+# Vulkan (Best for Linux) | DX12 (Best for Windows) | Metal (Only macOS)
+# If you are not familiar with backends, use AUTO | PRIMARY.
+# Impact: backend choice can strongly affect stability/performance per platform.
+graphic_backend = "AUTO"
+
+# Ui scale for better readbale. You can choose one step:
+# - 1 Very Far (scale 1.0)
+# - 2 Far (scale 1.25)
+# - 3 Medium (scale 1.5)
+# - 4 Near (scale 1.75)
+# - 5 Very Near (scale 2.0)
+# - Custom(scale) you can set your own scale. If you have problems with the other ones.
+# Usage for custom `ui_scale = "Custom(2.5)"` 2.5 is a example!
+ui_scale = "3"

@@ -1,0 +1,11 @@
+#############################################################################
+#                                                                           #
+#                             Interface Section                             #
+#                                                                           #
+#############################################################################
+
+# The language that ar using for reading the ui elements.
+# Supported Languages:
+# - German (de_DE)
+# - English (en_US)
+language = "english"
