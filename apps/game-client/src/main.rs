@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::render::RenderPlugin;
 use bevy::render::settings::{Backends, RenderCreation, WgpuSettings, WgpuSettingsPriority};
+use bevy::window::ExitCondition;
 use game_client_package::ClientPackedPlugin;
 use game_client_package::config::ClientConfigs;
 use game_client_package::config::debug_config::AppBuildInfo;
@@ -25,6 +26,7 @@ fn boot_bevy_app(app: &mut App, config: &ClientConfigs) {
     app.add_plugins(DefaultPlugins
         .set(
             WindowPlugin {
+                exit_condition: ExitCondition::DontExit,
                 primary_window: None,
                 ..default()
             }
