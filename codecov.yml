@@ -1,5 +1,14 @@
 codecov:
   require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
+
+fixes:
+  - "/home/runner/work/mira-game-files/mira-game-files/::"
+  - "/github/workspace/::"
+
+ignore:
+  - "apps/**"
 
 coverage:
   status:
