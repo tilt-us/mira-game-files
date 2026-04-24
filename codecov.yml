@@ -1,0 +1,28 @@
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
+
+fixes:
+  - "/home/runner/work/mira-game-files/mira-game-files/::"
+  - "/github/workspace/::"
+
+ignore:
+  - "apps/**"
+
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 0%
+        if_not_found: failure
+        if_ci_failed: error
+        informational: false
+    patch:
+      default:
+        target: 80%
+        threshold: 0%
+        if_not_found: failure
+        if_ci_failed: error
+        informational: false

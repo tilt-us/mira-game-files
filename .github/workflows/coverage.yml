@@ -1,0 +1,28 @@
+name: coverage
+
+on:
+  workflow_call:
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: game-testing-coverage
+          path: .
+      - name: Validate downloaded coverage report
+        run: |
+          test -s coverage.lcov
+          grep -q '^SF:' coverage.lcov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: tilt-us/mira-game-files
+          files: ./coverage.lcov
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true

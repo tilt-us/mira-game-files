@@ -10,5 +10,16 @@ path = "src/lib.rs"
 [dev-dependencies.game-shared]
 path = "../game-shared"
 
+[dev-dependencies.game-client-package]
+path = "../game-client-package"
+
+[dev-dependencies.bevy]
+workspace = true
+features = [
+  "bevy_ci_testing",
+  "bevy_state",
+  "bevy_window"
+]
+
 [dev-dependencies.bevy_input]
 workspace = true
