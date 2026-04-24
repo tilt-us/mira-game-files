@@ -42,3 +42,8 @@ jobs:
         with:
           name: game-testing-coverage
           path: coverage.lcov
+
+  coverage:
+    needs: testing
+    uses: ./.github/workflows/coverage.yml
+    secrets: inherit
