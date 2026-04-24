@@ -1,0 +1,47 @@
+name: Check PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check-title:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate PR title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request?.title ?? "";
+            const titlePattern = /^((feat|fix|chore|test|base|ref|ci)\(#\d+\): .+|(Release|Beta): .+)$/;
+
+            if (!titlePattern.test(title)) {
+              core.setFailed(
+                [
+                  `Invalid PR title: "${title}"`,
+                  "",
+                  "Allowed formats:",
+                  "feat(#1): description",
+                  "fix(#42): description",
+                  "chore(#10): description",
+                  "test(#5): description",
+                  "base(#2): description",
+                  "ref(#7): description",
+                  "ci: description",
+                  "Release: 1.0.0",
+                  "Beta: 0.9.0-beta.1",
+                  "",
+                  "Rules:",
+                  "- Prefix must be one of: feat, fix, chore, test, base, ref",
+                  "- Must include issue number like (#123)",
+                  '- OR use "Release:" / "Beta:" without issue'
+                ].join("\n")
+              );
+              return;
+            }
+
+            console.log("PR title is valid");
