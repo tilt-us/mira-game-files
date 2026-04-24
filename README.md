@@ -1,4 +1,5 @@
 # Mira: Fallen Gates
+[![codecov](https://codecov.io/github/tilt-us/mira-game-files/graph/badge.svg?token=YDGO5K9D1O)](https://codecov.io/github/tilt-us/mira-game-files)
 
 ### Testing
 This is the normal cargo test command. Only builds with no test fails are allowed to merge.
@@ -12,6 +13,23 @@ This is the normal cargo test command. Only builds with no test fails are allowe
 ```bash
   cargo test -p game-testing
 ```
+
+### Code Coverage
+Code coverage is tracked with Codecov and enforced via repository CI.
+
+- Minimum required coverage is `80%` for the full project (`project` status).
+- Minimum required coverage is `80%` for new/changed code (`patch` status).
+- `testing.yml` generates `coverage.lcov` in the repository root.
+- `coverage.yml` runs after `testing` succeeds and uploads the report to Codecov.
+
+What to check before pushing:
+- Keep or improve coverage for touched code paths, not only project-wide coverage.
+- Run coverage locally if needed:
+```bash
+cargo llvm-cov --package game-testing --lcov --output-path ./coverage.lcov
+```
+- If coverage drops below `80%` (project or patch), CI/Codecov status will fail.
+
 ___
 ### Pull Request Title Guidelines
 - Prefix must be one of: feat, fix, chore, test, base, ref

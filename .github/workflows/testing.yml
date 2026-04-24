@@ -10,6 +10,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
       - name: Install Bevy Linux dependencies (Wayland/X11)
         run: |
           sudo apt-get update
@@ -31,3 +35,10 @@ jobs:
         run: cargo build --workspace --locked
       - name: Run tests for game-testing crate
         run: cargo test -p game-testing --locked
+      - name: Track code coverage for game-testing
+        run: cargo llvm-cov --package game-testing --lcov --output-path ./coverage.lcov
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-testing-coverage
+          path: coverage.lcov
