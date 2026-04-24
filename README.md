@@ -19,14 +19,15 @@ Code coverage is tracked with Codecov and enforced via repository CI.
 
 - Minimum required coverage is `80%` for the full project (`project` status).
 - Minimum required coverage is `80%` for new/changed code (`patch` status).
-- `testing.yml` generates `coverage.lcov` in the repository root.
+- `testing.yml` generates `coverage.lcov` for all workspace crates in the repository root.
+- `apps/` is excluded from coverage (binary app target).
 - `coverage.yml` runs after `testing` succeeds and uploads the report to Codecov.
 
 What to check before pushing:
 - Keep or improve coverage for touched code paths, not only project-wide coverage.
 - Run coverage locally if needed:
 ```bash
-cargo llvm-cov --package game-testing --lcov --output-path ./coverage.lcov
+cargo llvm-cov --workspace --exclude game-client --lcov --output-path ./coverage.lcov --ignore-filename-regex '(^|/)apps/'
 ```
 - If coverage drops below `80%` (project or patch), CI/Codecov status will fail.
 

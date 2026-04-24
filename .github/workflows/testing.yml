@@ -36,7 +36,7 @@ jobs:
       - name: Run tests for game-testing crate
         run: cargo test -p game-testing --locked
       - name: Track code coverage for game-testing
-        run: cargo llvm-cov --package game-testing --lcov --output-path ./coverage.lcov --ignore-filename-regex '(^|/)apps/'
+        run: cargo llvm-cov --workspace --exclude game-client --lcov --output-path ./coverage.lcov --ignore-filename-regex '(^|/)apps/'
       - name: Validate coverage report
         run: |
           test -s coverage.lcov
