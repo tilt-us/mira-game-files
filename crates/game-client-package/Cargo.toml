@@ -10,12 +10,21 @@ path = "src/lib.rs"
 [dependencies.game-shared]
 path = "../game-shared"
 
+[dependencies.logic-module]
+path = "../module/logic-module"
+
+[dependencies.world-module]
+path = "../module/world-module"
+
 [dependencies.bevy]
 workspace = true
 features = [
     "bevy_state",
     "bevy_window"
 ]
+
+[dependencies.avian3d]
+workspace = true
 
 [dependencies.serde]
 workspace = true

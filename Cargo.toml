@@ -4,6 +4,8 @@ members = [
   "crates/game-shared",
   "crates/game-client-package",
   "crates/game-testing",
+  "crates/module/logic-module",
+  "crates/module/world-module"
 ]
 
 resolver = "2"
@@ -18,7 +20,7 @@ authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
 ##################################################
 
 # Main dependency for engine stuff. Bevy is used in all crates for handled
-#  game-related stuff. Note update this dependency is havey impact on the complete project!
+# game-related stuff. Note update this dependency is havey impact on the complete project!
 [workspace.dependencies.bevy]
 version = "0.18.1"
 default-features = false
@@ -34,6 +36,11 @@ version = "0.18.1"
 features = [
   "keyboard"
 ]
+
+# Physic Engine for bevy. This is bevy native and absulte needed for our project.
+# game-related stuff. Note update this dependency is havey impact on the world / logic module!
+[workspace.dependencies.avian3d]
+version = "0.6.1"
 
 # Dependency for handle ['.toml'] files.
 [workspace.dependencies.toml]
