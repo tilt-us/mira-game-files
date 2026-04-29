@@ -2297,6 +2297,8 @@ dependencies = [
  "bevy_input",
  "game-client-package",
  "game-shared",
+ "logic-module",
+ "world-module",
 ]
 
 [[package]]

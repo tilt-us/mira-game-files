@@ -13,6 +13,12 @@ path = "../game-shared"
 [dev-dependencies.game-client-package]
 path = "../game-client-package"
 
+[dev-dependencies.logic-module]
+path = "../module/logic-module"
+
+[dev-dependencies.world-module]
+path = "../module/world-module"
+
 [dev-dependencies.bevy]
 workspace = true
 features = [
