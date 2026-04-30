@@ -10,9 +10,8 @@ This is the normal cargo test command. Only builds with no test fails are allowe
 > This is the new and better way to test. This test framework gives you more information about the test.
 > To install `cargo install cargo-nextest`
 <br>
-```bash
-  cargo test -p game-testing
-```
+
+`cargo test -p game-testing`
 
 ### Code Coverage
 Code coverage is tracked with Codecov and enforced via repository CI.
