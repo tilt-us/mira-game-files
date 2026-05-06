@@ -2287,6 +2287,8 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_input",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -2795,6 +2797,7 @@ name = "logic-module"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "game-shared",
 ]
 
 [[package]]

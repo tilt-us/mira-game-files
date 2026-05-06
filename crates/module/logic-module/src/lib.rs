@@ -1,3 +1,5 @@
+pub mod player_logic;
+
 use bevy::prelude::*;
 
 pub struct LogicModule;

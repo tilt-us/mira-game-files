@@ -16,3 +16,6 @@ server.settings.toml
 # OS
 .DS_Store
 Thumbs.db
+
+# Assets Development
+/assets/dev/
