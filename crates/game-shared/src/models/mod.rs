@@ -21,7 +21,7 @@ pub struct EntityBase {
 
     pub health: f64,
     pub defense: f64,
-    pub super_amor: f64,
+    pub super_armor: f64,
 }
 
 impl Default for EntityBase {
@@ -32,7 +32,7 @@ impl Default for EntityBase {
             name: String::new(),
             health: 0.0,
             defense: 0.0,
-            super_amor: 0.0,
+            super_armor: 0.0,
         }
     }
 }

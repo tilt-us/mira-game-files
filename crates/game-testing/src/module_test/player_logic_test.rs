@@ -79,7 +79,7 @@ fn test_account_resource(character_id: u32, character_name: &str) -> AccountReso
             name: String::from(character_name),
             level: 1,
         }],
-        team: vec![TeamData {
+        teams: vec![TeamData {
             name: String::from("Test Team"),
             active: true,
             members: vec![character_id],

@@ -46,7 +46,7 @@ pub fn place_to_world(
         return;
     };
 
-    let Some(active_team) = account_response.team.iter().find(|team| team.active) else {
+    let Some(active_team) = account_response.teams.iter().find(|team| team.active) else {
         error!("No active team found in account response!");
         return;
     };

@@ -48,7 +48,7 @@ pub fn gen_player_from_response(
         return;
     };
 
-    let Some(active_team) = response.team.iter().find(|team| team.active) else {
+    let Some(active_team) = response.teams.iter().find(|team| team.active) else {
         error!("No active team found in account response!");
         character_group.active_character = None;
         character_group.characters.clear();
