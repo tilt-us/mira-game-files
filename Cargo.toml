@@ -33,8 +33,10 @@ path = "crates/game-shared"
 version = "0.18.1"
 default-features = false
 features = [
+  "3d",
   "bevy_asset",
   "bevy_log",
+  "debug",
   "multi_threaded"
 ]
 

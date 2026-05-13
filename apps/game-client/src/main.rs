@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use bevy::asset::AssetPlugin;
+use bevy::log::{DEFAULT_FILTER, LogPlugin};
 use bevy::render::RenderPlugin;
 use bevy::render::settings::{Backends, RenderCreation, WgpuSettings, WgpuSettingsPriority};
 use bevy::window::ExitCondition;
@@ -6,6 +8,7 @@ use game_client_package::ClientPackedPlugin;
 use game_client_package::config::ClientConfigs;
 use game_client_package::config::debug_config::AppBuildInfo;
 use game_client_package::states::{ClientState, LoadingState};
+use std::path::Path;
 
 /// The `main` function serves as the entry point for the application.
 ///
@@ -62,6 +65,18 @@ fn boot_bevy_app(app: &mut App, config: &ClientConfigs) {
 
     app.add_plugins(DefaultPlugins
         .set(
+            AssetPlugin {
+                file_path: project_assets_path(),
+                ..default()
+            }
+        )
+        .set(
+            LogPlugin {
+                filter: format!("{DEFAULT_FILTER}bevy_gltf::loader=error,"),
+                ..default()
+            }
+        )
+        .set(
             WindowPlugin {
                 exit_condition: ExitCondition::DontExit,
                 primary_window: None,
@@ -86,6 +101,22 @@ fn boot_bevy_app(app: &mut App, config: &ClientConfigs) {
     });
 
     app.run();
+}
+
+/// Resolves the absolute path to the shared project asset folder.
+///
+/// # Returns
+/// A UTF-8 string path pointing to `<workspace-root>/assets`.
+///
+/// # Notes
+/// The executable crate is located in `apps/game-client`. This function maps
+/// that location to the workspace-level asset directory so all modules can load
+/// assets from a single source of truth.
+fn project_assets_path() -> String {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../assets")
+        .to_string_lossy()
+        .to_string()
 }
 
 /// Selects the appropriate GPU backend based on client configuration.

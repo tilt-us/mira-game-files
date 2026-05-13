@@ -1,4 +1,5 @@
 pub mod group;
+pub mod world;
 
 use crate::models::EntityBase;
 use bevy::prelude::*;

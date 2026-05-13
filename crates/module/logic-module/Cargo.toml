@@ -12,3 +12,4 @@ workspace = true
 
 [dependencies.bevy]
 workspace = true
+features = ["scene", "bevy_gltf"]
