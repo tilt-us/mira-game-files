@@ -11,8 +11,7 @@ pub struct AccountResource(pub Option<AccountResponse>);
 pub struct AccountResponse {
     pub account: AccountData,
     pub characters: Vec<CharacterData>,
-    #[serde(rename = "teams")]
-    pub team: Vec<TeamData>,
+    pub teams: Vec<TeamData>,
 }
 
 #[derive(Deserialize, Debug, Clone, Default)]
