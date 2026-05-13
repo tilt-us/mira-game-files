@@ -9,14 +9,17 @@ pub struct PlayerSystemComponent;
 impl Plugin for PlayerSystemComponent {
     fn build(&self, app: &mut App) {
         app.add_systems(
-            OnEnter(ClientState::WindowVisible),
-            gen_player_from_response.run_if(resource_changed::<AccountResource>),
+            Update,
+            gen_player_from_response
+                .run_if(in_state(ClientState::WindowVisible))
+                .run_if(resource_changed::<AccountResource>),
         );
 
         app.add_systems(
-            OnEnter(ClientState::WindowVisible),
+            Update,
             place_to_world
                 .after(gen_player_from_response)
+                .run_if(in_state(ClientState::WindowVisible))
                 .run_if(resource_changed::<AccountResource>),
         );
     }
