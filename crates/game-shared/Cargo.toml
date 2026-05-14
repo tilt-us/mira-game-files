@@ -12,3 +12,7 @@ workspace = true
 
 [dependencies.bevy_input]
 workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }

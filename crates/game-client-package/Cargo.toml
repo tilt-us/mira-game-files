@@ -8,7 +8,7 @@ publish = false
 path = "src/lib.rs"
 
 [dependencies.game-shared]
-path = "../game-shared"
+workspace = true
 
 [dependencies.logic-module]
 path = "../module/logic-module"

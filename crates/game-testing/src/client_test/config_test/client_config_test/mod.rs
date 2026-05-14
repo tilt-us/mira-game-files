@@ -1,15 +1,10 @@
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::{Mutex, OnceLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use crate::test_utils::cwd_lock;
 use game_client_package::config::{ClientConfigs, GeneralConfig, GraphicsConfig};
-
-fn cwd_lock() -> &'static Mutex<()> {
-    static LOCK: OnceLock<Mutex<()>> = OnceLock::new();
-    LOCK.get_or_init(|| Mutex::new(()))
-}
 
 fn create_temp_test_dir() -> PathBuf {
     let now = SystemTime::now()
@@ -17,7 +12,11 @@ fn create_temp_test_dir() -> PathBuf {
         .expect("system time must be after unix epoch")
         .as_nanos();
 
-    let dir = env::temp_dir().join(format!("mira-game-testing-config-{}-{}", std::process::id(), now));
+    let dir = env::temp_dir().join(format!(
+        "mira-game-testing-config-{}-{}",
+        std::process::id(),
+        now
+    ));
     fs::create_dir_all(&dir).expect("failed to create temp test dir");
     dir
 }
@@ -26,15 +25,28 @@ fn run_in_temp_dir<F>(test_fn: F)
 where
     F: FnOnce(),
 {
+    struct TempDirCwdGuard {
+        original_dir: PathBuf,
+        temp_dir: PathBuf,
+    }
+
+    impl Drop for TempDirCwdGuard {
+        fn drop(&mut self) {
+            let _ = env::set_current_dir(&self.original_dir);
+            let _ = fs::remove_dir_all(&self.temp_dir);
+        }
+    }
+
     let _guard = cwd_lock().lock().expect("failed to acquire cwd lock");
     let original_dir = env::current_dir().expect("failed to read current dir");
     let temp_dir = create_temp_test_dir();
+    let _temp_dir_guard = TempDirCwdGuard {
+        original_dir,
+        temp_dir: temp_dir.clone(),
+    };
 
     env::set_current_dir(&temp_dir).expect("failed to switch to temp dir");
     test_fn();
-    env::set_current_dir(&original_dir).expect("failed to restore original cwd");
-
-    fs::remove_dir_all(&temp_dir).expect("failed to cleanup temp dir");
 }
 
 #[test]

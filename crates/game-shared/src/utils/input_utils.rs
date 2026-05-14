@@ -1,6 +1,6 @@
+use crate::utils::input_utils::KeyType::{CombinedKey, MultiKey, SingleKey};
 use bevy::log::{debug, warn};
 use bevy_input::prelude::{ButtonInput, KeyCode};
-use crate::utils::input_utils::KeyType::{CombinedKey, MultiKey, SingleKey};
 
 /// Represents different types of keys that can be used in a system or application.
 ///
@@ -13,7 +13,7 @@ use crate::utils::input_utils::KeyType::{CombinedKey, MultiKey, SingleKey};
 pub enum KeyType {
     SingleKey(String),
     MultiKey(Vec<String>),
-    CombinedKey((String, String))
+    CombinedKey((String, String)),
 }
 
 /// Fetches a `KeyType` representation based on the given named key.
@@ -59,7 +59,9 @@ pub fn fetch_key_code(named_key: &str) -> Option<KeyType> {
         let key_list: Vec<&str> = named_key.trim().split("|").collect();
         debug!("Fetched Key list: {:?}", key_list);
 
-        return Some(MultiKey(key_list.iter().map(|key| key.to_string()).collect()));
+        return Some(MultiKey(
+            key_list.iter().map(|key| key.to_string()).collect(),
+        ));
     }
 
     // If this contains, the key is combined key.
@@ -70,7 +72,10 @@ pub fn fetch_key_code(named_key: &str) -> Option<KeyType> {
             warn!("Combined key is too long! (Max 2 keys) other ones later ar ignored!");
         }
 
-        return Some(CombinedKey((key_list[0].to_string(), key_list[1].to_string())));
+        return Some(CombinedKey((
+            key_list[0].to_string(),
+            key_list[1].to_string(),
+        )));
     }
 
     // If this contains, the key is single key.
@@ -122,19 +127,23 @@ pub fn detect_key_action(named_key: String, keyboard: &ButtonInput<KeyCode>) -> 
     if let Some(key_type) = key_type {
         match key_type {
             SingleKey(key_name) => {
-                let key_code = convert_string_to_key_code(&key_name).expect(format!("Key not found! ( {} )", key_name).as_str());
+                let key_code = convert_string_to_key_code(&key_name)
+                    .expect(format!("Key not found! ( {} )", key_name).as_str());
                 return keyboard.just_pressed(key_code);
             }
 
             CombinedKey((key_name_1, key_name_2)) => {
-                let key_code_1 = convert_string_to_key_code(&key_name_1).expect(format!("Key not found! ( {} )", key_name_1).as_str());
-                let key_code_2 = convert_string_to_key_code(&key_name_2).expect(format!("Key not found! ( {} )", key_name_2).as_str());
+                let key_code_1 = convert_string_to_key_code(&key_name_1)
+                    .expect(format!("Key not found! ( {} )", key_name_1).as_str());
+                let key_code_2 = convert_string_to_key_code(&key_name_2)
+                    .expect(format!("Key not found! ( {} )", key_name_2).as_str());
                 return keyboard.just_pressed(key_code_1) && keyboard.just_pressed(key_code_2);
             }
 
             MultiKey(key_list) => {
                 for key_name in key_list {
-                    let key_code = convert_string_to_key_code(&key_name).expect(format!("Key not found! ( {} )", key_name).as_str());
+                    let key_code = convert_string_to_key_code(&key_name)
+                        .expect(format!("Key not found! ( {} )", key_name).as_str());
                     if keyboard.just_pressed(key_code) {
                         return true;
                     }

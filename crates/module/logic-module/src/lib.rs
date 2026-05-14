@@ -1,3 +1,6 @@
+pub mod camera_logic;
+pub mod player_logic;
+
 use bevy::prelude::*;
 
 pub struct LogicModule;

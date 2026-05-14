@@ -4,7 +4,6 @@ about: Create a new Feature task
 title: ''
 labels: feature
 assignees: ''
-type: Feature
 
 ---
 

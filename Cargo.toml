@@ -16,6 +16,14 @@ edition = "2024"
 authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
 
 ##################################################
+#                     Crates                     #
+##################################################
+
+# Our crate for share all of structs, events, modules, etc.
+[workspace.dependencies.game-shared]
+path = "crates/game-shared"
+
+##################################################
 #                  Dependencies                  #
 ##################################################
 
@@ -25,8 +33,10 @@ authors = ["Daniel Ramke <genshin.exepta@outlook.com>"]
 version = "0.18.1"
 default-features = false
 features = [
+  "3d",
   "bevy_asset",
   "bevy_log",
+  "debug",
   "multi_threaded"
 ]
 
