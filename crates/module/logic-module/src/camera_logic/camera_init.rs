@@ -14,6 +14,7 @@ pub fn init_camera(mut commands: Commands, existing_camera: Query<Entity, With<C
         return;
     }
 
+    info!("Initializing camera");
     commands.spawn((
         Camera3d::default(),
         Name::new("Main Camera"),

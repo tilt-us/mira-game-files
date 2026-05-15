@@ -25,12 +25,3 @@ features = [
 
 [dependencies.avian3d]
 workspace = true
-
-[dependencies.serde]
-workspace = true
-
-[dependencies.toml]
-workspace = true
-features = [
-    "display"
-]

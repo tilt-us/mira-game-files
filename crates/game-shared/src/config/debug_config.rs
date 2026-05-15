@@ -15,5 +15,5 @@ use bevy::prelude::*;
 pub struct AppBuildInfo {
     pub name: String,
     pub version: String,
-    pub bevy_version: String
+    pub bevy_version: String,
 }

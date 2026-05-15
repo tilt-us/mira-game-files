@@ -1,13 +1,13 @@
-use bevy::prelude::*;
 use bevy::asset::AssetPlugin;
 use bevy::log::{DEFAULT_FILTER, LogPlugin};
+use bevy::prelude::*;
 use bevy::render::RenderPlugin;
 use bevy::render::settings::{Backends, RenderCreation, WgpuSettings, WgpuSettingsPriority};
 use bevy::window::ExitCondition;
 use game_client_package::ClientPackedPlugin;
-use game_client_package::config::ClientConfigs;
-use game_client_package::config::debug_config::AppBuildInfo;
 use game_client_package::states::{ClientState, LoadingState};
+use game_shared::config::ClientConfigs;
+use game_shared::config::debug_config::AppBuildInfo;
 use std::path::Path;
 
 /// The `main` function serves as the entry point for the application.
@@ -63,40 +63,33 @@ fn boot_bevy_app(app: &mut App, config: &ClientConfigs) {
     app.insert_resource(config.clone());
     app.insert_resource(app_build_info);
 
-    app.add_plugins(DefaultPlugins
-        .set(
-            AssetPlugin {
+    app.add_plugins(
+        DefaultPlugins
+            .set(AssetPlugin {
                 file_path: project_assets_path(),
                 ..default()
-            }
-        )
-        .set(
-            LogPlugin {
+            })
+            .set(LogPlugin {
                 filter: format!("{DEFAULT_FILTER}bevy_gltf::loader=error,"),
                 ..default()
-            }
-        )
-        .set(
-            WindowPlugin {
+            })
+            .set(WindowPlugin {
                 exit_condition: ExitCondition::DontExit,
                 primary_window: None,
                 ..default()
-            }
-        )
-        .set(
-        RenderPlugin {
-            render_creation: RenderCreation::Automatic(select_gpu_backend(config.clone())),
-            ..default()
-        }
-        )
-        .set(ImagePlugin::default_nearest()
-        ));
+            })
+            .set(RenderPlugin {
+                render_creation: RenderCreation::Automatic(select_gpu_backend(config.clone())),
+                ..default()
+            })
+            .set(ImagePlugin::default_nearest()),
+    );
 
     app.add_plugins(ClientPackedPlugin);
 
     app.init_state::<ClientState>();
 
-    app.add_systems(Startup, | mut next_state: ResMut<NextState<ClientState>>| {
+    app.add_systems(Startup, |mut next_state: ResMut<NextState<ClientState>>| {
         next_state.set(ClientState::Loading(LoadingState::UiPreLoad));
     });
 
@@ -141,7 +134,12 @@ fn project_assets_path() -> String {
 /// # Error Handling
 /// * Unknown backend strings are logged, but no errors are returned.
 fn select_gpu_backend(client_configs: ClientConfigs) -> WgpuSettings {
-    let backend = match client_configs.config_graphics.graphic_backend.to_ascii_lowercase().as_str() {
+    let backend = match client_configs
+        .config_graphics
+        .graphic_backend
+        .to_ascii_lowercase()
+        .as_str()
+    {
         "auto" | "primary" => Some(Backends::PRIMARY),
         "vulkan" | "vlk" => Some(Backends::VULKAN),
         "dx12" | "directx12" | "d12" | "direct12" | "dx" => Some(Backends::DX12),

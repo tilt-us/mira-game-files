@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 
-use logic_module::LogicModule;
 use crate::test_utils::window_count;
+use logic_module::camera_logic::camera_init::init_camera;
 
 #[test]
-fn logic_module_can_be_added_without_spawning_windows() {
+fn logic_systems_can_be_registered_without_spawning_windows() {
     let mut app = App::new();
-    app.add_plugins(LogicModule);
+    app.add_plugins(MinimalPlugins);
+    app.add_systems(Update, init_camera);
 
     app.update();
 

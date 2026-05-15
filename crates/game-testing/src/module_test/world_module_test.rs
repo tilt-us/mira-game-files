@@ -1,12 +1,13 @@
 use bevy::prelude::*;
 
-use world_module::WorldModule;
 use crate::test_utils::window_count;
+use world_module::spawn_test_world;
 
 #[test]
-fn world_module_can_be_added_without_spawning_windows() {
+fn world_world_systems_can_be_registered_without_spawning_windows() {
     let mut app = App::new();
-    app.add_plugins(WorldModule);
+    app.add_plugins(MinimalPlugins);
+    app.add_systems(Update, spawn_test_world);
 
     app.update();
 

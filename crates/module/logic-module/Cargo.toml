@@ -13,3 +13,6 @@ workspace = true
 [dependencies.bevy]
 workspace = true
 features = ["scene", "bevy_gltf"]
+
+[dependencies.avian3d]
+workspace = true

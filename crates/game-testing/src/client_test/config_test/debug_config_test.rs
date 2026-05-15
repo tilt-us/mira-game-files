@@ -1,5 +1,5 @@
 use bevy::prelude::App;
-use game_client_package::config::debug_config::AppBuildInfo;
+use game_shared::config::debug_config::AppBuildInfo;
 
 #[test]
 fn app_build_info_can_be_inserted_as_resource() {

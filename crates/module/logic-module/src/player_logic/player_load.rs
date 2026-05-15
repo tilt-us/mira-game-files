@@ -1,9 +1,9 @@
 use bevy::prelude::*;
+use game_shared::models::EntityBase;
 use game_shared::models::character::Character;
 use game_shared::models::character::group::CharacterGroup;
 use game_shared::models::http::account::AccountResource;
 use game_shared::models::http::character::CharacterData;
-use game_shared::models::EntityBase;
 
 /// Generates a player's character data based on the provided account response and updates the given character group structure.
 ///

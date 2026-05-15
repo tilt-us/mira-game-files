@@ -1,9 +1,10 @@
+use avian3d::{math::*, prelude::*};
 use bevy::prelude::*;
 use bevy::scene::SceneRoot;
 use game_shared::models::character::group::CharacterGroup;
 use game_shared::models::character::world::CharacterWorldData;
 use game_shared::models::http::account::AccountResource;
-use game_shared::models::player::Player;
+use game_shared::models::player::{Player, PlayerMovementStats};
 
 /// Places the active player character into the world.
 ///
@@ -17,7 +18,7 @@ use game_shared::models::player::Player;
 /// 2. Read active character ID from `current_use`.
 /// 3. Resolve the active character data from [`CharacterGroup`].
 /// 4. Load [`CharacterWorldData`] by character ID.
-/// 5. Spawn a `Player` entity with character data and scene root.
+/// 5. Spawn a `Player` entity with character data, scene root and Avian3D physics body.
 ///
 /// # Parameters
 /// - `commands`: Used to despawn existing player entities and spawn the new one.
@@ -38,7 +39,7 @@ pub fn place_to_world(
     existing_players: Query<Entity, With<Player>>,
 ) {
     for entity in &existing_players {
-        commands.entity(entity).despawn();
+        commands.entity(entity).despawn_children().despawn();
     }
 
     let Some(account_response) = account_resource.0.as_ref() else {
@@ -80,13 +81,41 @@ pub fn place_to_world(
     let model_asset_path = format!("dev/models/{}", world_data.model_name);
     let scene: Handle<Scene> = asset_server.load(format!("{model_asset_path}#Scene0"));
 
-    commands.spawn((
-        Player,
-        active_character,
-        Name::new(world_data.display_name),
-        Transform::default(),
-        SceneRoot(scene),
-    ));
+    let collider = Collider::capsule(0.4, 1.0);
+    let mut ground_probe_shape = collider.clone();
+    ground_probe_shape.set_scale(Vector::ONE * 0.98, 10);
+
+    commands
+        .spawn((
+            Player,
+            active_character,
+            PlayerMovementStats::default(),
+            Name::new(world_data.display_name),
+            Transform::from_xyz(0.0, 0.9, 0.0),
+            Visibility::default(),
+            InheritedVisibility::default(),
+            ViewVisibility::default(),
+            RigidBody::Dynamic,
+            collider,
+            LockedAxes::ROTATION_LOCKED,
+            LinearVelocity::ZERO,
+            Friction::ZERO.with_combine_rule(CoefficientCombine::Min),
+            GravityScale(2.0),
+            ShapeCaster::new(
+                ground_probe_shape,
+                Vector::ZERO,
+                Quaternion::default(),
+                Dir3::NEG_Y,
+            )
+            .with_max_distance(0.3),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                SceneRoot(scene),
+                Transform::from_xyz(0.0, -0.9, 0.0),
+                Name::new("Player Scene"),
+            ));
+        });
 
     info!(
         "Placed active player character id {} using model '{}'",

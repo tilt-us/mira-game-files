@@ -1,6 +1,7 @@
 use crate::models::ModelsApp;
 use bevy::prelude::*;
 
+pub mod config;
 pub mod models;
 pub mod utils;
 

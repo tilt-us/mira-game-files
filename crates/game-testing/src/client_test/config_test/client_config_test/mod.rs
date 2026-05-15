@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::test_utils::cwd_lock;
-use game_client_package::config::{ClientConfigs, GeneralConfig, GraphicsConfig};
+use game_shared::config::{ClientConfigs, GeneralConfig, GraphicsConfig};
 
 fn create_temp_test_dir() -> PathBuf {
     let now = SystemTime::now()

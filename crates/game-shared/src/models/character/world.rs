@@ -83,7 +83,8 @@ impl CharacterWorldData {
 /// # Returns
 /// A [`PathBuf`] pointing to `assets/entities/characters/{character_id}.json`.
 fn character_definition_path(character_id: u64) -> PathBuf {
-    Path::new("assets")
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../assets")
         .join("entities")
         .join("characters")
         .join(format!("{character_id}.json"))

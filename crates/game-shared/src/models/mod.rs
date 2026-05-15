@@ -1,6 +1,8 @@
+pub mod camera;
 pub mod character;
 pub mod http;
 pub mod player;
+pub mod world;
 
 use bevy::prelude::*;
 

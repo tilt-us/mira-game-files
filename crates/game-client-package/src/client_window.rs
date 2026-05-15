@@ -1,14 +1,18 @@
-use bevy::prelude::*;
-use bevy::window::{MonitorSelection, PresentMode, PrimaryWindow, Window, WindowMode, WindowResolution};
-
-use crate::config::ClientConfigs;
 use crate::states::ClientState;
+use bevy::prelude::*;
+use bevy::window::{
+    MonitorSelection, PresentMode, PrimaryWindow, Window, WindowMode, WindowResolution,
+};
+use game_shared::config::ClientConfigs;
 
 pub struct ClientWindowPlugin;
 
 impl Plugin for ClientWindowPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(ClientState::WindowVisible), create_or_show_primary_window);
+        app.add_systems(
+            OnEnter(ClientState::WindowVisible),
+            create_or_show_primary_window,
+        );
     }
 }
 

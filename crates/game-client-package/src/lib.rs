@@ -1,17 +1,14 @@
 pub mod client_window;
-pub mod config;
 pub mod states;
-pub mod ui;
 mod systems;
+pub mod ui;
 
+use crate::systems::ClientSystemPlugin;
+use crate::ui::ClientUiPlugin;
 use avian3d::PhysicsPlugins;
 use bevy::prelude::*;
 use client_window::ClientWindowPlugin;
 use game_shared::SharedLoadPlugin;
-use logic_module::LogicModule;
-use world_module::WorldModule;
-use crate::systems::ClientSystemPlugin;
-use crate::ui::ClientUiPlugin;
 
 pub struct ClientPackedPlugin;
 
@@ -22,13 +19,7 @@ impl Plugin for ClientPackedPlugin {
             SharedLoadPlugin,
             ClientSystemPlugin,
             ClientWindowPlugin,
-            ClientUiPlugin
-        ));
-
-        // Add Module Plugins
-        app.add_plugins((
-            LogicModule,
-            WorldModule
+            ClientUiPlugin,
         ));
 
         // Add Bevy Plugins

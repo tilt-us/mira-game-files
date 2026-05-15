@@ -3,8 +3,8 @@ use bevy::state::app::StatesPlugin;
 use bevy::window::{MonitorSelection, PresentMode, PrimaryWindow, Window, WindowMode};
 
 use game_client_package::client_window::ClientWindowPlugin;
-use game_client_package::config::ClientConfigs;
 use game_client_package::states::ClientState;
+use game_shared::config::ClientConfigs;
 
 fn window_count(app: &mut App) -> usize {
     let world = app.world_mut();
