@@ -29,3 +29,6 @@ features = [
 
 [dev-dependencies.bevy_input]
 workspace = true
+
+[dev-dependencies.avian3d]
+workspace = true

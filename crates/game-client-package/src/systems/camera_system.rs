@@ -1,7 +1,9 @@
 use crate::states::ClientState;
 use bevy::prelude::*;
 use game_shared::models::camera::MenuCursorState;
-use logic_module::camera_logic::camera_cursor::{init_cursor_lock_state, toggle_cursor_lock_with_open_menu};
+use logic_module::camera_logic::camera_cursor::{
+    init_cursor_lock_state, toggle_cursor_lock_with_open_menu,
+};
 use logic_module::camera_logic::camera_follow::{
     follow_player_orbit_camera, init_orbit_follow_camera,
 };
