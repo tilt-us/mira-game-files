@@ -9,3 +9,9 @@ path = "src/lib.rs"
 
 [dependencies.bevy]
 workspace = true
+
+[dependencies.avian3d]
+workspace = true
+
+[dependencies.game-shared]
+workspace = true

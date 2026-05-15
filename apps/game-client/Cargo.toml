@@ -11,6 +11,9 @@ path = "src/main.rs"
 [dependencies.game-client-package]
 path = "../../crates/game-client-package"
 
+[dependencies.game-shared]
+path = "../../crates/game-shared"
+
 [dependencies.bevy]
 workspace = true
 features = [

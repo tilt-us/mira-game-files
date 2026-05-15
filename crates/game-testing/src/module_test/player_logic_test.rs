@@ -1,13 +1,13 @@
 use crate::test_utils::cwd_lock;
 use bevy::asset::AssetPlugin;
 use bevy::prelude::*;
-use game_shared::models::character::group::CharacterGroup;
+use game_shared::models::EntityBase;
 use game_shared::models::character::Character;
+use game_shared::models::character::group::CharacterGroup;
 use game_shared::models::http::account::{AccountData, AccountResource, AccountResponse};
 use game_shared::models::http::character::CharacterData;
 use game_shared::models::http::team::TeamData;
 use game_shared::models::player::Player;
-use game_shared::models::EntityBase;
 use logic_module::player_logic::player_load::gen_player_from_response;
 use logic_module::player_logic::player_to_world::place_to_world;
 use std::fs;
@@ -43,7 +43,7 @@ fn create_character_definition_for_id(
     display_name: &str,
     model_name: &str,
 ) -> CharacterDefinitionCleanup {
-    let base_dir = Path::new("assets/entities/characters");
+    let base_dir = character_definitions_dir();
     fs::create_dir_all(&base_dir).expect("failed to create local character test directory");
 
     let path = base_dir.join(format!("{character_id}.json"));
@@ -60,10 +60,14 @@ fn create_character_definition_for_id(
 }
 
 fn remove_character_definition_for_id(character_id: u32) {
-    let path = Path::new("assets/entities/characters").join(format!("{character_id}.json"));
+    let path = character_definitions_dir().join(format!("{character_id}.json"));
     if path.exists() {
         fs::remove_file(path).expect("failed to remove character test json");
     }
+}
+
+fn character_definitions_dir() -> std::path::PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets/entities/characters")
 }
 
 fn test_account_resource(character_id: u32, character_name: &str) -> AccountResource {

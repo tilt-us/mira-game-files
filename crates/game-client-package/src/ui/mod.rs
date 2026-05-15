@@ -1,14 +1,16 @@
-use bevy::prelude::*;
 use crate::states::{ClientState, LoadingState};
+use bevy::prelude::*;
 
 pub struct ClientUiPlugin;
 
 impl Plugin for ClientUiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(ClientState::Loading(LoadingState::UiPreLoad)), load_ui_assets);
+        app.add_systems(
+            OnEnter(ClientState::Loading(LoadingState::UiPreLoad)),
+            load_ui_assets,
+        );
     }
 }
-
 
 /// Loads the UI assets and transitions the application state.
 ///

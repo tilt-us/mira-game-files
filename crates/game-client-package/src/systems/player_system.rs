@@ -1,13 +1,37 @@
 use crate::states::ClientState;
 use bevy::prelude::*;
+use game_shared::config::ClientConfigs;
 use game_shared::models::http::account::AccountResource;
+use game_shared::models::player::PlayerMovementInputConfig;
 use logic_module::player_logic::player_load::gen_player_from_response;
+use logic_module::player_logic::player_movement::{player_movement_detect, update_player_grounded};
 use logic_module::player_logic::player_to_world::place_to_world;
 
+/// Registers player generation, world placement, and movement systems.
 pub struct PlayerSystemComponent;
 
 impl Plugin for PlayerSystemComponent {
     fn build(&self, app: &mut App) {
+        app.add_systems(
+            OnEnter(ClientState::WindowVisible),
+            sync_input_config_from_client,
+        );
+
+        app.add_systems(
+            OnEnter(ClientState::WindowVisible),
+            (
+                gen_player_from_response,
+                place_to_world.after(gen_player_from_response),
+            ),
+        );
+
+        app.add_systems(
+            Update,
+            sync_input_config_from_client
+                .run_if(in_state(ClientState::WindowVisible))
+                .run_if(resource_changed::<ClientConfigs>),
+        );
+
         app.add_systems(
             Update,
             gen_player_from_response
@@ -22,5 +46,40 @@ impl Plugin for PlayerSystemComponent {
                 .run_if(in_state(ClientState::WindowVisible))
                 .run_if(resource_changed::<AccountResource>),
         );
+
+        app.add_systems(
+            Update,
+            (update_player_grounded, player_movement_detect)
+                .chain()
+                .run_if(in_state(ClientState::WindowVisible))
+                .run_if(resource_exists::<PlayerMovementInputConfig>),
+        );
     }
+}
+
+/// Synchronizes the input configuration from the client and updates the game's input settings.
+///
+/// # Parameters
+/// - `commands`: A mutable instance of `Commands` that allows for the manipulation of game resources and entities.
+/// - `client_configs`: A resource containing the client's configuration settings, specifically the input mappings.
+///
+/// This function retrieves the input configuration from the provided `ClientConfigs` resource and maps the client's
+/// input settings to the game's internal `PlayerMovementInputConfig` resource. The mapping includes keys for
+/// forward movement, backward movement, strafing left and right, jumping, sprinting, and sneaking. These settings
+/// are then stored as a new resource, overriding any existing input configuration for the player.
+///
+/// # Purpose
+/// Ensures that the game's input configuration reflects the client's settings, allowing for customized controls
+/// by the player.
+fn sync_input_config_from_client(mut commands: Commands, client_configs: Res<ClientConfigs>) {
+    let config = &client_configs.config_input;
+    commands.insert_resource(PlayerMovementInputConfig {
+        movement_forward: config.movement_forward().to_string(),
+        movement_backward: config.movement_backward().to_string(),
+        movement_left: config.movement_left().to_string(),
+        movement_right: config.movement_right().to_string(),
+        movement_jump: config.movement_jump().to_string(),
+        movement_sprint: config.movement_sprint().to_string(),
+        movement_sneak: config.movement_sneak().to_string(),
+    });
 }

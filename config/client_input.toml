@@ -30,8 +30,9 @@ movement_sprint = "ShiftLeft"
 movement_sneak = "CtrlLeft"
 
 # Camera Rotation speed for vertical and horizontal movement (yaw | pitch). (Default both: 1.0)
-mouse_sensitivity_vertical = 1.0
-mouse_sensitivity_horizontal = 1.0
+# By linux it is 0.1 better than 1.0 because 1.0 is much faster than by windows, for example.
+mouse_sensitivity_vertical = 0.1
+mouse_sensitivity_horizontal = 0.1
 
 #############################################################################
 #                                                                           #

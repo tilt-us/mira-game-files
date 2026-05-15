@@ -1,9 +1,9 @@
 pub mod debug_config;
 
-use std::fs;
-use std::path::Path;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::Path;
 
 // #######################################################
 // #                   ClientConfigs                     #
@@ -40,11 +40,10 @@ use serde::{Deserialize, Serialize};
 pub struct ClientConfigs {
     pub config_general: GeneralConfig,
     pub config_graphics: GraphicsConfig,
-    pub config_input: InputConfig
+    pub config_input: InputConfig,
 }
 
 impl Default for ClientConfigs {
-
     /// Creates a new instance of the struct with default values for all configuration fields.
     ///
     /// # Returns
@@ -53,13 +52,12 @@ impl Default for ClientConfigs {
         Self {
             config_general: GeneralConfig::default(),
             config_graphics: GraphicsConfig::default(),
-            config_input: InputConfig::default()
+            config_input: InputConfig::default(),
         }
     }
 }
 
 impl ClientConfigs {
-
     /// Ensures the existence of default configuration files for the application.
     ///
     /// This function checks whether the specified configuration files exist in their respective
@@ -168,7 +166,7 @@ impl ClientConfigs {
         Self {
             config_general: Self::load("config/client_general.toml"),
             config_graphics: Self::load("config/client_graphics.toml"),
-            config_input: Self::load("config/client_input.toml")
+            config_input: Self::load("config/client_input.toml"),
         }
     }
 
@@ -232,11 +230,10 @@ impl ClientConfigs {
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct GeneralConfig {
     #[serde(default = "default_language")]
-    pub language: String
+    pub language: String,
 }
 
 impl Default for GeneralConfig {
-
     /// Creates a default instance of the struct with pre-defined values.
     ///
     /// # Returns
@@ -245,7 +242,7 @@ impl Default for GeneralConfig {
     /// returned by the `default_language` function.
     fn default() -> Self {
         Self {
-            language: default_language()
+            language: default_language(),
         }
     }
 }
@@ -299,11 +296,10 @@ pub struct GraphicsConfig {
     #[serde(default = "default_graphic_backend")]
     pub graphic_backend: String,
     #[serde(default = "default_ui_scale")]
-    pub ui_scale: String
+    pub ui_scale: String,
 }
 
 impl Default for GraphicsConfig {
-
     /// Provides a default implementation for initializing an instance of the struct.
     ///
     /// This function returns a new instance of the struct with default values for its fields:
@@ -325,10 +321,9 @@ impl Default for GraphicsConfig {
             fullscreen: false,
             vsync: default_vsync(),
             graphic_backend: default_graphic_backend(),
-            ui_scale: default_ui_scale()
+            ui_scale: default_ui_scale(),
         }
     }
-
 }
 
 /// Returns the default window width as a `u32`.
@@ -463,11 +458,62 @@ pub struct InputConfig {
     #[serde(default)]
     debug_collider: String,
     #[serde(default)]
-    benchmark_start_stop: String
+    benchmark_start_stop: String,
+}
+
+impl InputConfig {
+    /// Returns the binding used for forward movement.
+    pub fn movement_forward(&self) -> &str {
+        &self.movement_forward
+    }
+
+    /// Returns the binding used for backward movement.
+    pub fn movement_backward(&self) -> &str {
+        &self.movement_backward
+    }
+
+    /// Returns the binding used for left movement.
+    pub fn movement_left(&self) -> &str {
+        &self.movement_left
+    }
+
+    /// Returns the binding used for right movement.
+    pub fn movement_right(&self) -> &str {
+        &self.movement_right
+    }
+
+    /// Returns the binding used for jumping.
+    pub fn movement_jump(&self) -> &str {
+        &self.movement_jump
+    }
+
+    /// Returns the binding used for sprinting.
+    pub fn movement_sprint(&self) -> &str {
+        &self.movement_sprint
+    }
+
+    /// Returns the binding used for sneaking.
+    pub fn movement_sneak(&self) -> &str {
+        &self.movement_sneak
+    }
+
+    /// Returns the binding used for opening the menu.
+    pub fn open_menu(&self) -> &str {
+        &self.open_menu
+    }
+
+    /// Returns horizontal mouse sensitivity.
+    pub fn mouse_sensitivity_horizontal(&self) -> f32 {
+        self.mouse_sensitivity_horizontal
+    }
+
+    /// Returns vertical mouse sensitivity.
+    pub fn mouse_sensitivity_vertical(&self) -> f32 {
+        self.mouse_sensitivity_vertical
+    }
 }
 
 impl Default for InputConfig {
-
     /// Provides the default key bindings and control settings for a game or application.
     ///
     /// # Returns
@@ -505,7 +551,7 @@ impl Default for InputConfig {
             close_active_ui: String::from("Escape"),
             system_info_screen: String::from("F3"),
             debug_collider: String::from("F3 + C"),
-            benchmark_start_stop: String::from("F3 + B")
+            benchmark_start_stop: String::from("F3 + B"),
         }
     }
 }

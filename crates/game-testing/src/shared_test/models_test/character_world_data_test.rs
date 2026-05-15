@@ -1,5 +1,6 @@
 use crate::test_utils::cwd_lock;
 use game_shared::models::character::world::CharacterWorldData;
+use std::env;
 use std::fs;
 use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -22,7 +23,7 @@ impl Drop for CharacterDefinitionCleanup {
 }
 
 fn create_character_definition_for_id(character_id: u64) -> CharacterDefinitionCleanup {
-    let base_dir = Path::new("assets/entities/characters");
+    let base_dir = character_definitions_dir();
     fs::create_dir_all(&base_dir).expect("failed to create local character test directory");
 
     let path = base_dir.join(format!("{character_id}.json"));
@@ -38,10 +39,14 @@ fn create_character_definition_for_id(character_id: u64) -> CharacterDefinitionC
 }
 
 fn remove_character_definition_for_id(character_id: u64) {
-    let path = Path::new("assets/entities/characters").join(format!("{character_id}.json"));
+    let path = character_definitions_dir().join(format!("{character_id}.json"));
     if path.exists() {
         fs::remove_file(path).expect("failed to remove character test json");
     }
+}
+
+fn character_definitions_dir() -> std::path::PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../assets/entities/characters")
 }
 
 #[test]
@@ -79,4 +84,20 @@ fn build_from_id_returns_error_for_missing_definition() {
     let result = CharacterWorldData::build_from_id(99_999_999);
 
     assert!(result.is_err());
+}
+
+#[test]
+fn build_from_id_works_independent_from_current_working_directory() {
+    let _guard = cwd_lock().lock().expect("failed to lock current dir");
+    let original_dir = env::current_dir().expect("failed to read current dir");
+    let app_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../apps/game-client");
+
+    env::set_current_dir(&app_dir).expect("failed to switch to app directory");
+
+    let result = CharacterWorldData::build_from_id(6606);
+
+    env::set_current_dir(original_dir).expect("failed to restore current dir");
+
+    let world_data = result.expect("expected character definition by id to be readable");
+    assert_eq!(world_data.display_name, "Lira");
 }

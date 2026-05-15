@@ -40,7 +40,7 @@ pub enum ClientState {
     WindowVisible,
     Before(BeforeState),
     Loading(LoadingState),
-    InGame(InGameState)
+    InGame(InGameState),
 }
 
 /// Represents the states that can occur before the main gameplay.
@@ -58,7 +58,7 @@ pub enum ClientState {
 pub enum BeforeState {
     #[default]
     SplashScreen,
-    MainMenu
+    MainMenu,
 }
 
 /// Represents the various states of a loading process within the application.
@@ -88,7 +88,7 @@ pub enum LoadingState {
     #[default]
     Begin,
     Progress,
-    After
+    After,
 }
 
 /// Represents the various states of the game.
@@ -102,7 +102,7 @@ pub enum LoadingState {
 ///
 /// - `Playing`: The default state, representing that the game is currently in progress.
 /// - `Paused`: Represents that the game is temporarily halted.
-/// 
+///
 /// ## Usage
 ///
 /// This enum is typically used in state management systems where different phases of
@@ -111,7 +111,7 @@ pub enum LoadingState {
 pub enum InGameState {
     #[default]
     Playing,
-    Paused
+    Paused,
 }
 
 /// Checks if the current `ClientState` matches the `Before` state.

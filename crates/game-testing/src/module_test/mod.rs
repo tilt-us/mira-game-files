@@ -1,4 +1,8 @@
+mod camera_cursor_test;
+mod camera_follow_test;
 mod camera_logic_test;
 mod logic_module_test;
+mod player_load_test;
 mod player_logic_test;
+mod player_movement_test;
 mod world_module_test;
