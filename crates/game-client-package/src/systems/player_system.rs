@@ -4,8 +4,11 @@ use game_shared::config::ClientConfigs;
 use game_shared::models::http::account::AccountResource;
 use game_shared::models::player::PlayerMovementInputConfig;
 use logic_module::player_logic::player_load::gen_player_from_response;
-use logic_module::player_logic::player_movement::{player_movement_detect, update_player_grounded};
+use logic_module::player_logic::player_movement::{
+    party_companion_follow, player_movement_detect, update_player_grounded,
+};
 use logic_module::player_logic::player_to_world::place_to_world;
+use world_module::spawn_test_world;
 
 /// Registers player generation, world placement, and movement systems.
 pub struct PlayerSystemComponent;
@@ -21,7 +24,9 @@ impl Plugin for PlayerSystemComponent {
             OnEnter(ClientState::WindowVisible),
             (
                 gen_player_from_response,
-                place_to_world.after(gen_player_from_response),
+                place_to_world
+                    .after(gen_player_from_response)
+                    .after(spawn_test_world),
             ),
         );
 
@@ -49,7 +54,7 @@ impl Plugin for PlayerSystemComponent {
 
         app.add_systems(
             Update,
-            (update_player_grounded, player_movement_detect)
+            (update_player_grounded, player_movement_detect, party_companion_follow)
                 .chain()
                 .run_if(in_state(ClientState::WindowVisible))
                 .run_if(resource_exists::<PlayerMovementInputConfig>),

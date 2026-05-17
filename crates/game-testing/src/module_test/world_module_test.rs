@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::test_utils::window_count;
-use game_shared::models::world::{TestWorldFloor, TestWorldLight};
+use game_shared::models::world::{TestWorldFloor, TestWorldLight, TestWorldObstacle, TestWorldWall};
 use world_module::spawn_test_world;
 
 #[test]
@@ -29,6 +29,10 @@ fn spawn_test_world_creates_floor_and_light_once() {
     let world = app.world_mut();
     let mut floor_query = world.query_filtered::<Entity, With<TestWorldFloor>>();
     let mut light_query = world.query_filtered::<Entity, With<TestWorldLight>>();
+    let mut wall_query = world.query_filtered::<Entity, With<TestWorldWall>>();
+    let mut obstacle_query = world.query_filtered::<Entity, With<TestWorldObstacle>>();
     assert_eq!(floor_query.iter(world).count(), 1);
     assert_eq!(light_query.iter(world).count(), 1);
+    assert_eq!(wall_query.iter(world).count(), 4);
+    assert_eq!(obstacle_query.iter(world).count(), 5);
 }
