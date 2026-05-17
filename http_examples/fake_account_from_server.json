@@ -15,6 +15,16 @@
       "id": 6607,
       "name": "Ignara",
       "level": 1
+    },
+    {
+      "id": 6608,
+      "name": "Yuna",
+      "level": 1
+    },
+    {
+      "id": 6609,
+      "name": "Sophia",
+      "level": 1
     }
   ],
   "teams": [
@@ -22,7 +32,7 @@
       "name": "Test Team",
       "active": true,
       "members": [
-        6606, 6607
+        6606, 6607, 6608, 6609
       ],
       "leader": 6606,
       "current_use": 6607

@@ -4,6 +4,14 @@ use bevy::prelude::*;
 #[derive(Component, Debug, Clone)]
 pub struct Player;
 
+/// Marker component for entities spawned from the active party roster.
+#[derive(Component, Debug, Clone)]
+pub struct PartySpawnedCharacter;
+
+/// Marker component for party members that are visible but not locally controlled.
+#[derive(Component, Debug, Clone)]
+pub struct PartyCompanion;
+
 /// Marker component indicating that the player currently has ground contact.
 #[derive(Component, Debug, Clone)]
 #[component(storage = "SparseSet")]
