@@ -329,12 +329,11 @@ fn find_companion_spawn_position(
         let radius = COMPANION_SPAWN_MIN_DISTANCE + radius_span * attempt_ratio;
         let angle = phase + attempt as f32 * 2.399_963_1;
 
-        let candidate = center
-            + Vec3::new(
-                angle.cos() * radius,
-                COMPANION_SPAWN_HEIGHT,
-                angle.sin() * radius,
-            );
+        let candidate = Vec3::new(
+            center.x + angle.cos() * radius,
+            COMPANION_SPAWN_HEIGHT,
+            center.z + angle.sin() * radius,
+        );
 
         if is_spawn_position_clear(
             candidate,
