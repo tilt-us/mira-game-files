@@ -102,11 +102,13 @@ pub fn setup_character_animation(
             .entity(animation_player_entity)
             .insert((AnimationGraphHandle(graph_handle), transitions));
 
-        commands.entity(controller_entity).insert(CharacterAnimationController {
-            animation_player_entity,
-            nodes,
-            current_state: CharacterAnimationState::Idle,
-        });
+        commands
+            .entity(controller_entity)
+            .insert(CharacterAnimationController {
+                animation_player_entity,
+                nodes,
+                current_state: CharacterAnimationState::Idle,
+            });
     }
 }
 
@@ -166,7 +168,15 @@ pub fn setup_character_animation(
 pub fn update_character_animation_state(
     keyboard: Res<ButtonInput<KeyCode>>,
     input_config: Res<PlayerMovementInputConfig>,
-    player_query: Query<(&Transform, &LinearVelocity, Option<&PlayerGrounded>), With<Player>>,
+    player_query: Query<
+        (
+            &Transform,
+            &LinearVelocity,
+            Option<&PlayerMovementStats>,
+            Option<&PlayerGrounded>,
+        ),
+        With<Player>,
+    >,
     mut character_query: Query<(
         &mut CharacterAnimationController,
         &Transform,
@@ -180,12 +190,12 @@ pub fn update_character_animation_state(
     let (player_position, player_intent) = player_query
         .iter()
         .next()
-        .map(|(player_transform, velocity, grounded)| {
+        .map(|(player_transform, velocity, movement_stats, grounded)| {
             (
                 player_transform.translation,
                 resolve_player_animation_state(
                     velocity,
-                    None,
+                    movement_stats,
                     grounded.is_some(),
                     &keyboard,
                     &input_config,
@@ -195,6 +205,7 @@ pub fn update_character_animation_state(
         .unwrap_or((Vec3::ZERO, CharacterAnimationState::Idle));
 
     for (mut controller, transform, velocity, movement_stats, is_grounded, is_player) in &mut character_query {
+        let horizontal_speed = Vec2::new(velocity.x, velocity.z).length();
         let target_state = if is_player {
             resolve_player_animation_state(
                 velocity,
@@ -206,6 +217,11 @@ pub fn update_character_animation_state(
         } else {
             let distance_to_player = transform.translation.distance(player_position);
             resolve_companion_animation_state(velocity, player_intent, distance_to_player)
+        };
+        let playback_speed = if is_player {
+            animation_speed_for_state(target_state)
+        } else {
+            companion_playback_speed_for_state(target_state, horizontal_speed)
         };
         let Some(target_node) = controller
             .nodes
@@ -222,20 +238,31 @@ pub fn update_character_animation_state(
         };
 
         if target_state != controller.current_state {
-            transitions
-                .play(
-                    &mut animation_player,
-                    target_node,
-                    Duration::from_millis(140),
-                )
-                .repeat()
-                .set_speed(animation_speed_for_state(target_state));
+            let active_animation = transitions.play(
+                &mut animation_player,
+                target_node,
+                Duration::from_millis(140),
+            );
+            if target_state != CharacterAnimationState::Jump {
+                active_animation.repeat();
+            }
+            active_animation.set_speed(playback_speed);
             controller.current_state = target_state;
             continue;
         }
 
         if let Some(active) = animation_player.animation_mut(target_node) {
-            active.set_speed(animation_speed_for_state(target_state));
+            active.set_speed(playback_speed);
+        } else {
+            let active_animation = transitions.play(
+                &mut animation_player,
+                target_node,
+                Duration::from_millis(120),
+            );
+            if target_state != CharacterAnimationState::Jump {
+                active_animation.repeat();
+            }
+            active_animation.set_speed(playback_speed);
         }
     }
 }
@@ -346,38 +373,26 @@ fn resolve_companion_animation_state(
         return CharacterAnimationState::Idle;
     }
 
-    match player_intent {
-        CharacterAnimationState::Idle => {
-            if distance_to_player < 5.0 {
-                CharacterAnimationState::SlowWalk
-            } else if distance_to_player < 8.0 {
-                CharacterAnimationState::Walk
-            } else {
-                CharacterAnimationState::Sprint
-            }
+    if player_intent == CharacterAnimationState::Idle {
+        if distance_to_player < 5.0 {
+            return CharacterAnimationState::SlowWalk;
         }
-        CharacterAnimationState::SlowWalk => CharacterAnimationState::SlowWalk,
-        CharacterAnimationState::Walk => {
-            if horizontal_speed < 1.9 {
-                CharacterAnimationState::SlowWalk
-            } else {
-                CharacterAnimationState::Walk
-            }
+        if distance_to_player < 8.0 {
+            return CharacterAnimationState::Walk;
         }
-        CharacterAnimationState::Sprint => {
-            if horizontal_speed < 2.0 {
-                CharacterAnimationState::Walk
-            } else {
-                CharacterAnimationState::Sprint
-            }
-        }
-        CharacterAnimationState::Jump => {
-            if horizontal_speed < 1.8 {
-                CharacterAnimationState::SlowWalk
-            } else {
-                CharacterAnimationState::Walk
-            }
-        }
+        return CharacterAnimationState::Sprint;
+    }
+
+    companion_locomotion_state_from_speed(horizontal_speed)
+}
+
+fn companion_locomotion_state_from_speed(horizontal_speed: f32) -> CharacterAnimationState {
+    if horizontal_speed < 2.0 {
+        CharacterAnimationState::SlowWalk
+    } else if horizontal_speed < 4.2 {
+        CharacterAnimationState::Walk
+    } else {
+        CharacterAnimationState::Sprint
     }
 }
 
@@ -389,4 +404,15 @@ fn animation_speed_for_state(state: CharacterAnimationState) -> f32 {
         CharacterAnimationState::Sprint => 1.12,
         CharacterAnimationState::Jump => 1.0,
     }
+}
+
+fn companion_playback_speed_for_state(state: CharacterAnimationState, horizontal_speed: f32) -> f32 {
+    let base_speed = match state {
+        CharacterAnimationState::SlowWalk => 2.4,
+        CharacterAnimationState::Walk => 5.2,
+        CharacterAnimationState::Sprint => 8.6,
+        _ => return animation_speed_for_state(state),
+    };
+
+    (horizontal_speed / base_speed).clamp(0.7, 1.35)
 }

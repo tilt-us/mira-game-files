@@ -15,7 +15,10 @@ use std::path::{Path, PathBuf};
 /// - `display_name`: player-facing short name.
 /// - `full_name`: canonical character name.
 /// - `model_name`: model file name (for example, `lira.glb`).
-/// - `animations`: animation mappings with clip keys and GLB animation indices.
+///
+/// Optional:
+/// - `animations`: animation mappings with clip keys and GLB animation indices
+///   (defaults to an empty list when omitted).
 #[derive(Deserialize, Debug, Clone, Default)]
 pub struct CharacterWorldData {
     /// Internal or localized identifier text.
@@ -27,6 +30,9 @@ pub struct CharacterWorldData {
     /// GLB file name used for scene and animation loading.
     pub model_name: String,
     /// Mapping from logical animation keys to GLB animation indices.
+    ///
+    /// Defaults to an empty list when the key is missing in legacy JSON files.
+    #[serde(default)]
     pub animations: Vec<CharacterAnimation>,
 }
 
@@ -39,8 +45,7 @@ impl CharacterWorldData {
     ///   `assets/entities/characters/{character_id}.json`.
     ///
     /// # Returns
-    /// - `Ok(CharacterWorldData)` when the file exists and contains valid JSON
-    ///   including animation mapping entries.
+    /// - `Ok(CharacterWorldData)` when the file exists and contains valid JSON.
     /// - `Err(String)` with context if the file cannot be read or parsed.
     pub fn build_from_id(character_id: u64) -> Result<Self, String> {
         let path = character_definition_path(character_id);
@@ -53,8 +58,7 @@ impl CharacterWorldData {
     /// - `path`: The path of the JSON file to load.
     ///
     /// # Returns
-    /// - `Ok(CharacterWorldData)` if the file is readable and valid JSON including
-    ///   animation mappings.
+    /// - `Ok(CharacterWorldData)` if the file is readable and valid JSON.
     /// - `Err(String)` containing a descriptive error message otherwise.
     pub fn build_from_json<P: AsRef<Path>>(path: P) -> Result<Self, String> {
         let path = path.as_ref();
