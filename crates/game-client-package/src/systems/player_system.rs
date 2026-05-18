@@ -2,13 +2,14 @@ use crate::states::ClientState;
 use bevy::prelude::*;
 use game_shared::config::ClientConfigs;
 use game_shared::models::http::account::AccountResource;
-use game_shared::models::player::PlayerMovementInputConfig;
+use game_shared::models::player::{PlayerMovementInputConfig, PlayerPartyInputConfig};
 use logic_module::player_logic::character_animation::{
     setup_character_animation, update_character_animation_state,
 };
 use logic_module::player_logic::player_load::gen_player_from_response;
 use logic_module::player_logic::player_movement::{
-    party_companion_follow, player_movement_detect, update_player_grounded,
+    party_companion_follow, player_movement_detect, swap_active_party_character,
+    update_player_grounded,
 };
 use logic_module::player_logic::player_to_world::place_to_world;
 use world_module::spawn_test_world;
@@ -57,13 +58,13 @@ impl Plugin for PlayerSystemComponent {
 
         app.add_systems(
             Update,
-            setup_character_animation
-                .run_if(in_state(ClientState::WindowVisible)),
+            setup_character_animation.run_if(in_state(ClientState::WindowVisible)),
         );
 
         app.add_systems(
             Update,
             (
+                swap_active_party_character,
                 update_player_grounded,
                 player_movement_detect,
                 party_companion_follow,
@@ -102,4 +103,43 @@ fn sync_input_config_from_client(mut commands: Commands, client_configs: Res<Cli
         movement_sprint: config.movement_sprint().to_string(),
         movement_sneak: config.movement_sneak().to_string(),
     });
+
+    commands.insert_resource(PlayerPartyInputConfig {
+        party_slot_01: config.party_slot_01().to_string(),
+        party_slot_02: config.party_slot_02().to_string(),
+        party_slot_03: config.party_slot_03().to_string(),
+        party_slot_04: config.party_slot_04().to_string(),
+        party_next_slot: config.party_next_slot().to_string(),
+    });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sync_input_config_from_client_inserts_movement_and_party_bindings() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins);
+        app.insert_resource(ClientConfigs::default());
+        app.add_systems(Update, sync_input_config_from_client);
+
+        app.update();
+
+        let movement = app.world().resource::<PlayerMovementInputConfig>();
+        assert_eq!(movement.movement_forward, "W");
+        assert_eq!(movement.movement_backward, "S");
+        assert_eq!(movement.movement_left, "A");
+        assert_eq!(movement.movement_right, "D");
+        assert_eq!(movement.movement_jump, "Space");
+        assert_eq!(movement.movement_sprint, "ShiftLeft");
+        assert_eq!(movement.movement_sneak, "CtrlLeft");
+
+        let party = app.world().resource::<PlayerPartyInputConfig>();
+        assert_eq!(party.party_slot_01, "1");
+        assert_eq!(party.party_slot_02, "2");
+        assert_eq!(party.party_slot_03, "3");
+        assert_eq!(party.party_slot_04, "4");
+        assert_eq!(party.party_next_slot, "Q");
+    }
 }

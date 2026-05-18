@@ -1,10 +1,10 @@
 use avian3d::prelude::{LinearVelocity, ShapeHits};
 use bevy::prelude::*;
-use game_shared::models::character::Character;
 use game_shared::models::player::{
-    PartyCompanion, Player, PlayerGrounded, PlayerMovementInputConfig, PlayerMovementStats,
+    PartyCompanion, PartySlot, Player, PlayerGrounded, PlayerMovementInputConfig,
+    PlayerMovementStats, PlayerPartyInputConfig,
 };
-use game_shared::utils::input_utils::{KeyType, convert_string_to_key_code, fetch_key_code};
+use game_shared::utils::input_utils::{convert_string_to_key_code, fetch_key_code, KeyType};
 use std::f32::consts::PI;
 
 const PLAYER_TURN_SPEED_RAD_PER_SEC: f32 = 10.0;
@@ -25,6 +25,58 @@ pub fn update_player_grounded(
             commands.entity(entity).insert(PlayerGrounded);
         }
     }
+}
+
+/// Swaps player control between party members based on configured slot bindings.
+///
+/// Pressing slot bindings (`party_slot_01` .. `party_slot_04`) transfers the
+/// [`Player`] marker to the selected party member entity if it exists.
+pub fn swap_active_party_character(
+    mut commands: Commands,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    party_input_config: Res<PlayerPartyInputConfig>,
+    active_player_query: Query<(Entity, &PartySlot), With<Player>>,
+    companion_query: Query<(Entity, &PartySlot), With<PartyCompanion>>,
+) {
+    let Some((active_player_entity, active_slot)) = active_player_query.iter().next() else {
+        return;
+    };
+
+    let companion_slots = companion_query
+        .iter()
+        .map(|(_, party_slot)| party_slot.index)
+        .collect::<Vec<_>>();
+
+    let Some(target_slot) = requested_party_slot(
+        &keyboard,
+        &party_input_config,
+        active_slot.index,
+        &companion_slots,
+    ) else {
+        return;
+    };
+
+    if active_slot.index == target_slot {
+        return;
+    }
+
+    let Some((target_entity, _)) = companion_query
+        .iter()
+        .find(|(_, party_slot)| party_slot.index == target_slot)
+    else {
+        return;
+    };
+
+    commands
+        .entity(active_player_entity)
+        .remove::<Player>()
+        .remove::<PlayerGrounded>()
+        .insert(PartyCompanion);
+
+    commands
+        .entity(target_entity)
+        .remove::<PartyCompanion>()
+        .insert(Player);
 }
 
 /// Applies character movement using configured key bindings and camera-relative movement.
@@ -134,17 +186,11 @@ pub fn player_movement_detect(
 /// - They settle around nearby standing spots when the player is idle.
 pub fn party_companion_follow(
     time: Res<Time>,
-    player_query: Query<
-        (&Transform, &LinearVelocity),
-        (With<Player>, Without<PartyCompanion>),
-    >,
+    player_query: Query<(&Transform, &LinearVelocity), (With<Player>, Without<PartyCompanion>)>,
     mut companion_queries: ParamSet<(
+        Query<(Entity, &Transform), (With<PartyCompanion>, Without<Player>)>,
         Query<
-            (Entity, &Transform, &Character),
-            (With<PartyCompanion>, Without<Player>),
-        >,
-        Query<
-            (Entity, &mut Transform, &mut LinearVelocity, &Character),
+            (Entity, &mut Transform, &mut LinearVelocity, &PartySlot),
             (With<PartyCompanion>, Without<Player>),
         >,
     )>,
@@ -173,7 +219,7 @@ pub fn party_companion_follow(
         let query = companion_queries.p0();
         query
             .iter()
-            .map(|(entity, transform, character)| (entity, transform.translation, character.base.id))
+            .map(|(entity, transform)| (entity, transform.translation))
             .collect::<Vec<_>>()
     };
 
@@ -189,9 +235,9 @@ pub fn party_companion_follow(
     };
     let step = acceleration * time.delta_secs();
 
-    for (entity, mut transform, mut velocity, character) in &mut companion_queries.p1() {
+    for (entity, mut transform, mut velocity, party_slot) in &mut companion_queries.p1() {
         let target = companion_slot_target(
-            character.base.id,
+            party_slot.index,
             player_position,
             player_forward,
             is_player_moving,
@@ -202,7 +248,7 @@ pub fn party_companion_follow(
         let target_distance = to_target.length();
 
         let mut separation = Vec3::ZERO;
-        for (other_entity, other_position, _) in &companion_snapshot {
+        for (other_entity, other_position) in &companion_snapshot {
             if *other_entity == entity {
                 continue;
             }
@@ -264,7 +310,7 @@ pub fn party_companion_follow(
 ///
 /// # Parameters
 ///
-/// - `companion_id`: A unique identifier for the companion. This is used to generate a
+/// - `companion_slot_index`: Stable party slot index of the companion.
 ///   pseudo-randomized behavior unique to each companion.
 /// - `player_position`: The current position of the player in 3D space, represented as a `Vec3`.
 /// - `player_forward`: The forward direction of the player as a unit vector (`Vec3`).
@@ -287,12 +333,12 @@ pub fn party_companion_follow(
 /// - The target position calculates a 2D offset based on the base direction and spread angle but
 ///   retains the player's `y` position to match the height.
 fn companion_slot_target(
-    companion_id: u64,
+    companion_slot_index: u8,
     player_position: Vec3,
     player_forward: Vec3,
     is_player_moving: bool,
 ) -> Vec3 {
-    let seed = seed_to_unit_interval(companion_id);
+    let seed = seed_to_unit_interval(companion_slot_index as u64);
     let side_bias = seed * 2.0 - 1.0;
     let spread_angle = if is_player_moving {
         side_bias * 1.05
@@ -428,4 +474,42 @@ fn is_binding_just_pressed(binding: &str, keyboard: &ButtonInput<KeyCode>) -> bo
         }
         None => false,
     }
+}
+
+fn requested_party_slot(
+    keyboard: &ButtonInput<KeyCode>,
+    party_input_config: &PlayerPartyInputConfig,
+    active_slot_index: u8,
+    companion_slots: &[u8],
+) -> Option<u8> {
+    if is_binding_just_pressed(&party_input_config.party_slot_01, keyboard) {
+        return Some(1);
+    }
+    if is_binding_just_pressed(&party_input_config.party_slot_02, keyboard) {
+        return Some(2);
+    }
+    if is_binding_just_pressed(&party_input_config.party_slot_03, keyboard) {
+        return Some(3);
+    }
+    if is_binding_just_pressed(&party_input_config.party_slot_04, keyboard) {
+        return Some(4);
+    }
+
+    if is_binding_just_pressed(&party_input_config.party_next_slot, keyboard) {
+        let mut sorted_slots = companion_slots.to_vec();
+        sorted_slots.sort_unstable();
+        sorted_slots.dedup();
+
+        if let Some(next_slot) = sorted_slots
+            .iter()
+            .copied()
+            .find(|slot| *slot > active_slot_index)
+        {
+            return Some(next_slot);
+        }
+
+        return sorted_slots.into_iter().next();
+    }
+
+    None
 }

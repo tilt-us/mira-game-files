@@ -2,12 +2,13 @@ use avian3d::math::Vector;
 use avian3d::prelude::{LinearVelocity, ShapeHitData, ShapeHits};
 use bevy::ecs::system::IntoSystem;
 use bevy::prelude::*;
-use game_shared::models::character::Character;
 use game_shared::models::player::{
-    PartyCompanion, Player, PlayerGrounded, PlayerMovementInputConfig, PlayerMovementStats,
+    PartyCompanion, PartySlot, Player, PlayerGrounded, PlayerMovementInputConfig,
+    PlayerMovementStats, PlayerPartyInputConfig,
 };
 use logic_module::player_logic::player_movement::{
-    party_companion_follow, player_movement_detect, update_player_grounded,
+    party_companion_follow, player_movement_detect, swap_active_party_character,
+    update_player_grounded,
 };
 use std::time::Duration;
 
@@ -43,16 +44,14 @@ fn update_player_grounded_inserts_and_removes_marker() {
 
     app.update();
 
-    assert!(
-        app.world()
-            .entity(grounded_entity)
-            .contains::<PlayerGrounded>()
-    );
-    assert!(
-        !app.world()
-            .entity(airborne_entity)
-            .contains::<PlayerGrounded>()
-    );
+    assert!(app
+        .world()
+        .entity(grounded_entity)
+        .contains::<PlayerGrounded>());
+    assert!(!app
+        .world()
+        .entity(airborne_entity)
+        .contains::<PlayerGrounded>());
 }
 
 #[test]
@@ -341,12 +340,9 @@ fn player_movement_detect_uses_air_acceleration_when_not_grounded() {
         ground_acceleration: 1000.0,
         air_acceleration: 1.0,
     };
-    let player_entity = app.world_mut().spawn((
-        Player,
-        Transform::default(),
-        LinearVelocity::ZERO,
-        stats,
-    ));
+    let player_entity =
+        app.world_mut()
+            .spawn((Player, Transform::default(), LinearVelocity::ZERO, stats));
     let player_entity = player_entity.id();
 
     {
@@ -366,16 +362,250 @@ fn player_movement_detect_uses_air_acceleration_when_not_grounded() {
     assert!(horizontal_speed <= 1.1);
 }
 
-fn companion_with_id(id: u64) -> Character {
-    Character {
-        base: game_shared::models::EntityBase {
-            id,
-            localized_name: format!("Companion-{id}"),
-            name: format!("Companion-{id}"),
-            ..default()
-        },
-        ..default()
+#[test]
+fn swap_active_party_character_switches_to_requested_slot() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.insert_resource(ButtonInput::<KeyCode>::default());
+    app.insert_resource(PlayerPartyInputConfig::default());
+    app.add_systems(Update, swap_active_party_character);
+
+    let previous_player = app.world_mut().spawn((Player, PartySlot { index: 1 })).id();
+    let requested_player = app
+        .world_mut()
+        .spawn((PartyCompanion, PartySlot { index: 2 }))
+        .id();
+
+    {
+        let mut keyboard = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+        keyboard.press(KeyCode::Digit2);
     }
+    app.update();
+
+    assert!(!app.world().entity(previous_player).contains::<Player>());
+    assert!(app
+        .world()
+        .entity(previous_player)
+        .contains::<PartyCompanion>());
+    assert!(app.world().entity(requested_player).contains::<Player>());
+    assert!(!app
+        .world()
+        .entity(requested_player)
+        .contains::<PartyCompanion>());
+    assert_eq!(
+        app.world()
+            .entity(previous_player)
+            .get::<PartySlot>()
+            .expect("expected previous player slot")
+            .index,
+        1
+    );
+    assert_eq!(
+        app.world()
+            .entity(requested_player)
+            .get::<PartySlot>()
+            .expect("expected requested player slot")
+            .index,
+        2
+    );
+}
+
+#[test]
+fn swap_active_party_character_ignores_missing_slot() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.insert_resource(ButtonInput::<KeyCode>::default());
+    app.insert_resource(PlayerPartyInputConfig::default());
+    app.add_systems(Update, swap_active_party_character);
+
+    let player_entity = app.world_mut().spawn((Player, PartySlot { index: 1 })).id();
+
+    {
+        let mut keyboard = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+        keyboard.press(KeyCode::Digit4);
+    }
+    app.update();
+
+    assert!(app.world().entity(player_entity).contains::<Player>());
+    assert!(!app
+        .world()
+        .entity(player_entity)
+        .contains::<PartyCompanion>());
+}
+
+#[test]
+fn swap_active_party_character_uses_next_slot_binding() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.insert_resource(ButtonInput::<KeyCode>::default());
+    app.insert_resource(PlayerPartyInputConfig::default());
+    app.add_systems(Update, swap_active_party_character);
+
+    let previous_player = app.world_mut().spawn((Player, PartySlot { index: 1 })).id();
+    let next_player = app
+        .world_mut()
+        .spawn((PartyCompanion, PartySlot { index: 2 }))
+        .id();
+    app.world_mut()
+        .spawn((PartyCompanion, PartySlot { index: 4 }));
+
+    {
+        let mut keyboard = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+        keyboard.press(KeyCode::KeyQ);
+    }
+    app.update();
+
+    assert!(!app.world().entity(previous_player).contains::<Player>());
+    assert!(app.world().entity(next_player).contains::<Player>());
+}
+
+#[test]
+fn swap_active_party_character_wraps_next_slot_binding() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.insert_resource(ButtonInput::<KeyCode>::default());
+    app.insert_resource(PlayerPartyInputConfig::default());
+    app.add_systems(Update, swap_active_party_character);
+
+    let wrapped_player = app
+        .world_mut()
+        .spawn((PartyCompanion, PartySlot { index: 1 }))
+        .id();
+    app.world_mut()
+        .spawn((PartyCompanion, PartySlot { index: 2 }));
+    app.world_mut().spawn((Player, PartySlot { index: 4 }));
+
+    {
+        let mut keyboard = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+        keyboard.press(KeyCode::KeyQ);
+    }
+    app.update();
+
+    assert!(app.world().entity(wrapped_player).contains::<Player>());
+}
+
+#[test]
+fn swap_active_party_character_next_slot_does_nothing_without_companions() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.insert_resource(ButtonInput::<KeyCode>::default());
+    app.insert_resource(PlayerPartyInputConfig::default());
+    app.add_systems(Update, swap_active_party_character);
+
+    let player_entity = app.world_mut().spawn((Player, PartySlot { index: 1 })).id();
+
+    {
+        let mut keyboard = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+        keyboard.press(KeyCode::KeyQ);
+    }
+    app.update();
+
+    assert!(app.world().entity(player_entity).contains::<Player>());
+    assert!(!app
+        .world()
+        .entity(player_entity)
+        .contains::<PartyCompanion>());
+}
+
+#[test]
+fn swap_active_party_character_ignores_same_slot_selection() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.insert_resource(ButtonInput::<KeyCode>::default());
+    app.insert_resource(PlayerPartyInputConfig::default());
+    app.add_systems(Update, swap_active_party_character);
+
+    let player_entity = app.world_mut().spawn((Player, PartySlot { index: 1 })).id();
+    app.world_mut()
+        .spawn((PartyCompanion, PartySlot { index: 2 }));
+
+    {
+        let mut keyboard = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+        keyboard.press(KeyCode::Digit1);
+    }
+    app.update();
+
+    assert!(app.world().entity(player_entity).contains::<Player>());
+    assert!(!app
+        .world()
+        .entity(player_entity)
+        .contains::<PartyCompanion>());
+}
+
+#[test]
+fn swap_active_party_character_returns_when_no_active_player_exists() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.insert_resource(ButtonInput::<KeyCode>::default());
+    app.insert_resource(PlayerPartyInputConfig::default());
+    app.add_systems(Update, swap_active_party_character);
+
+    let companion_entity = app
+        .world_mut()
+        .spawn((PartyCompanion, PartySlot { index: 2 }))
+        .id();
+
+    {
+        let mut keyboard = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+        keyboard.press(KeyCode::Digit2);
+    }
+    app.update();
+
+    assert!(app
+        .world()
+        .entity(companion_entity)
+        .contains::<PartyCompanion>());
+    assert!(!app.world().entity(companion_entity).contains::<Player>());
+}
+
+#[test]
+fn swap_active_party_character_supports_third_slot_binding() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.insert_resource(ButtonInput::<KeyCode>::default());
+    app.insert_resource(PlayerPartyInputConfig::default());
+    app.add_systems(Update, swap_active_party_character);
+
+    let previous_player = app.world_mut().spawn((Player, PartySlot { index: 1 })).id();
+    let requested_player = app
+        .world_mut()
+        .spawn((PartyCompanion, PartySlot { index: 3 }))
+        .id();
+
+    {
+        let mut keyboard = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+        keyboard.press(KeyCode::Digit3);
+    }
+    app.update();
+
+    assert!(app
+        .world()
+        .entity(previous_player)
+        .contains::<PartyCompanion>());
+    assert!(app.world().entity(requested_player).contains::<Player>());
+}
+
+#[test]
+fn swap_active_party_character_does_nothing_without_swap_input() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.insert_resource(ButtonInput::<KeyCode>::default());
+    app.insert_resource(PlayerPartyInputConfig::default());
+    app.add_systems(Update, swap_active_party_character);
+
+    let player_entity = app.world_mut().spawn((Player, PartySlot { index: 1 })).id();
+    let companion_entity = app
+        .world_mut()
+        .spawn((PartyCompanion, PartySlot { index: 2 }))
+        .id();
+
+    app.update();
+
+    assert!(app.world().entity(player_entity).contains::<Player>());
+    assert!(app
+        .world()
+        .entity(companion_entity)
+        .contains::<PartyCompanion>());
 }
 
 #[test]
@@ -392,7 +622,7 @@ fn party_companion_follow_moves_companions_when_player_is_moving() {
 
     let companion_entity = app.world_mut().spawn((
         PartyCompanion,
-        companion_with_id(1),
+        PartySlot { index: 2 },
         Transform::from_xyz(-20.0, 0.9, 0.0),
         LinearVelocity::ZERO,
     ));
@@ -416,11 +646,12 @@ fn party_companion_follow_applies_player_personal_space() {
     app.add_plugins(MinimalPlugins);
     app.add_systems(Update, party_companion_follow);
 
-    app.world_mut().spawn((Player, Transform::default(), LinearVelocity::ZERO));
+    app.world_mut()
+        .spawn((Player, Transform::default(), LinearVelocity::ZERO));
 
     let companion_entity = app.world_mut().spawn((
         PartyCompanion,
-        companion_with_id(2),
+        PartySlot { index: 2 },
         Transform::from_xyz(0.4, 0.9, 0.0),
         LinearVelocity::ZERO,
     ));
@@ -444,11 +675,12 @@ fn party_companion_follow_applies_companion_separation() {
     app.add_plugins(MinimalPlugins);
     app.add_systems(Update, party_companion_follow);
 
-    app.world_mut().spawn((Player, Transform::default(), LinearVelocity::ZERO));
+    app.world_mut()
+        .spawn((Player, Transform::default(), LinearVelocity::ZERO));
 
     let companion_left = app.world_mut().spawn((
         PartyCompanion,
-        companion_with_id(3),
+        PartySlot { index: 2 },
         Transform::from_xyz(-0.2, 0.9, -3.0),
         LinearVelocity::ZERO,
     ));
@@ -456,7 +688,7 @@ fn party_companion_follow_applies_companion_separation() {
 
     let companion_right = app.world_mut().spawn((
         PartyCompanion,
-        companion_with_id(4),
+        PartySlot { index: 3 },
         Transform::from_xyz(0.2, 0.9, -3.0),
         LinearVelocity::ZERO,
     ));
@@ -490,7 +722,7 @@ fn party_companion_follow_returns_without_player() {
 
     let companion_entity = app.world_mut().spawn((
         PartyCompanion,
-        companion_with_id(5),
+        PartySlot { index: 2 },
         Transform::from_xyz(4.0, 0.9, 0.0),
         LinearVelocity(Vector::new(0.5, 0.0, 0.0)),
     ));
