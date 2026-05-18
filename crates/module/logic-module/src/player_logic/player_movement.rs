@@ -7,6 +7,8 @@ use game_shared::models::player::{
 use game_shared::utils::input_utils::{KeyType, convert_string_to_key_code, fetch_key_code};
 use std::f32::consts::PI;
 
+const PLAYER_TURN_SPEED_RAD_PER_SEC: f32 = 10.0;
+
 /// Updates grounded state by evaluating shape cast hits attached to player bodies.
 ///
 /// # Behavior
@@ -114,9 +116,12 @@ pub fn player_movement_detect(
         }
 
         if move_direction != Vec3::ZERO {
-            let look_target = player_transform.translation + move_direction;
-            player_transform.look_at(look_target, Vec3::Y);
-            player_transform.rotate_y(PI);
+            rotate_towards_direction_smooth(
+                &mut player_transform,
+                move_direction,
+                time.delta_secs(),
+                PLAYER_TURN_SPEED_RAD_PER_SEC,
+            );
         }
     }
 }
@@ -311,6 +316,21 @@ fn companion_slot_target(
     let mut target = player_position + slot_direction * radius;
     target.y = player_position.y;
     target
+}
+
+fn rotate_towards_direction_smooth(
+    transform: &mut Transform,
+    direction: Vec3,
+    delta_seconds: f32,
+    turn_speed_rad_per_sec: f32,
+) {
+    let look_target = transform.translation + direction;
+    let target_rotation = Transform::from_translation(transform.translation)
+        .looking_at(look_target, Vec3::Y)
+        .rotation
+        * Quat::from_rotation_y(PI);
+    let interpolation = (turn_speed_rad_per_sec * delta_seconds).clamp(0.0, 1.0);
+    transform.rotation = transform.rotation.slerp(target_rotation, interpolation);
 }
 
 fn seed_to_unit_interval(seed: u64) -> f32 {
