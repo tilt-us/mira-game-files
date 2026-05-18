@@ -318,8 +318,52 @@ fn seed_to_unit_interval(seed: u64) -> f32 {
     (hashed as f64 / u64::MAX as f64) as f32
 }
 
-/// Returns `true` if the configured binding is currently held.
-fn is_binding_pressed(binding: &str, keyboard: &ButtonInput<KeyCode>) -> bool {
+/// Checks if a specified key binding is pressed.
+///
+/// This function evaluates whether the input corresponding to a given binding
+/// is currently pressed on the keyboard. The binding can represent a single key,
+/// multiple keys (any of which being pressed will trigger a positive result),
+/// or a combination of two keys (both of which need to be pressed simultaneously).
+///
+/// # Arguments
+///
+/// * `binding` - A string reference representing the key binding. This can map
+///   to a single key, a multi-key binding, or a combined key binding.
+/// * `keyboard` - A reference to a `ButtonInput<KeyCode>` that is used to check
+///   the pressed state of keys on the keyboard.
+///
+/// # Returns
+///
+/// * `true` if the binding's corresponding key(s) are pressed.
+/// * `false` if the binding is not pressed, is improperly formatted, or its key(s)
+///   could not be converted to valid key codes.
+///
+/// # Key Types
+///
+/// The `binding` can resolve to one of the following:
+/// - `KeyType::SingleKey`: A single key that can be pressed.
+/// - `KeyType::MultiKey`: Multiple keys, any one of which being pressed is sufficient.
+/// - `KeyType::CombinedKey`: A pair of keys, both of which need to be pressed.
+///
+/// # Behavior
+///
+/// 1. If the binding represents a single key:
+///    - The function attempts to convert the string representation of the key to a `KeyCode`.
+///    - If the conversion is successful, it checks whether the resulting `KeyCode` is pressed.
+///    - If the conversion fails, the function returns `false`.
+///
+/// 2. If the binding represents multiple keys:
+///    - The function iterates over the keys in the binding.
+///    - If any key converts successfully and is pressed, the function returns `true`.
+///    - If no keys are pressed or none could be converted, the function returns `false`.
+///
+/// 3. If the binding represents a combined key (two keys pressed together):
+///    - The function attempts to convert both keys in the pair to `KeyCode`s.
+///    - If both conversions succeed and both keys are pressed, the function returns `true`.
+///    - If one or both keys cannot be converted or are not pressed, the function returns `false`.
+///
+/// 4. If the binding is `None` or does not map to any valid key type, the function returns `false`.
+pub fn is_binding_pressed(binding: &str, keyboard: &ButtonInput<KeyCode>) -> bool {
     match fetch_key_code(binding) {
         Some(KeyType::SingleKey(key)) => convert_string_to_key_code(&key)
             .map(|key_code| keyboard.pressed(key_code))

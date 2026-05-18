@@ -1,6 +1,7 @@
 use avian3d::{math::*, prelude::*};
 use bevy::prelude::*;
 use bevy::scene::SceneRoot;
+use game_shared::models::character::animation::CharacterAnimationLoadout;
 use game_shared::models::character::group::CharacterGroup;
 use game_shared::models::character::world::CharacterWorldData;
 use game_shared::models::http::account::AccountResource;
@@ -159,7 +160,8 @@ pub fn place_to_world(
 /// - `commands`: A mutable reference to the [`Commands`] resource, used to spawn and configure entities.
 /// - `asset_server`: A reference to the [`AssetServer`] resource, used to load game assets such as models.
 /// - `character`: A [`Character`] object containing data about the player's character, such as stats or customization.
-/// - `world_data`: A [`CharacterWorldData`] object containing world-specific data for the character, such as its display name and model name.
+/// - `world_data`: A [`CharacterWorldData`] object containing world-specific data for the character,
+///   such as display name, model name, and animation mappings.
 ///
 /// # Notes
 ///
@@ -179,6 +181,10 @@ fn spawn_party_player(
 ) {
     let model_asset_path = format!("dev/models/{}", world_data.model_name);
     let scene: Handle<Scene> = asset_server.load(format!("{model_asset_path}#Scene0"));
+    let animation_loadout = CharacterAnimationLoadout {
+        model_asset_path: model_asset_path.clone(),
+        clips: world_data.animations.clone(),
+    };
 
     let collider = Collider::capsule(0.4, 1.0);
     let mut ground_probe_shape = collider.clone();
@@ -206,6 +212,7 @@ fn spawn_party_player(
                 Dir3::NEG_Y,
             )
             .with_max_distance(0.3),
+            animation_loadout,
         ))
         .insert((
             Visibility::default(),
@@ -230,7 +237,8 @@ fn spawn_party_player(
 /// - `commands`: A mutable reference to the `Commands` object, used to spawn and manage entities in the game world.
 /// - `asset_server`: A reference to the `AssetServer`, used to load 3D models or other assets.
 /// - `character`: The character model representing the companion in the game. This is usually defined in the shared game models.
-/// - `world_data`: A `CharacterWorldData` structure that contains information like the display name and model file associated with the companion.
+/// - `world_data`: A `CharacterWorldData` structure that contains information like
+///   the display name, model file, and animation mappings associated with the companion.
 /// - `position`: A `Vec3` representing the initial world position where the companion should be spawned.
 ///
 /// # Asset Loading
@@ -245,6 +253,10 @@ fn spawn_party_companion(
 ) {
     let model_asset_path = format!("dev/models/{}", world_data.model_name);
     let scene: Handle<Scene> = asset_server.load(format!("{model_asset_path}#Scene0"));
+    let animation_loadout = CharacterAnimationLoadout {
+        model_asset_path: model_asset_path.clone(),
+        clips: world_data.animations.clone(),
+    };
 
     commands
         .spawn((
@@ -260,6 +272,7 @@ fn spawn_party_companion(
             LinearVelocity::ZERO,
             Friction::ZERO.with_combine_rule(CoefficientCombine::Min),
             GravityScale(2.0),
+            animation_loadout,
         ))
         .insert((
             Visibility::default(),

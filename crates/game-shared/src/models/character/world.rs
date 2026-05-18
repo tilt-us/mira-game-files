@@ -1,3 +1,4 @@
+use super::CharacterAnimation;
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
 
@@ -5,7 +6,8 @@ use std::path::{Path, PathBuf};
 ///
 /// These fields are intentionally decoupled from account payloads. Account responses
 /// provide ownership and progression data (for example ID and level), while this
-/// structure provides static character presentation and model mapping data.
+/// structure provides static character presentation, model mapping, and animation
+/// mapping data.
 ///
 /// # File Format
 /// A character definition JSON must provide:
@@ -13,12 +15,19 @@ use std::path::{Path, PathBuf};
 /// - `display_name`: player-facing short name.
 /// - `full_name`: canonical character name.
 /// - `model_name`: model file name (for example, `lira.glb`).
+/// - `animations`: animation mappings with clip keys and GLB animation indices.
 #[derive(Deserialize, Debug, Clone, Default)]
 pub struct CharacterWorldData {
+    /// Internal or localized identifier text.
     pub localized_name: String,
+    /// Player-facing short name.
     pub display_name: String,
+    /// Canonical character name.
     pub full_name: String,
+    /// GLB file name used for scene and animation loading.
     pub model_name: String,
+    /// Mapping from logical animation keys to GLB animation indices.
+    pub animations: Vec<CharacterAnimation>,
 }
 
 impl CharacterWorldData {
@@ -30,7 +39,8 @@ impl CharacterWorldData {
     ///   `assets/entities/characters/{character_id}.json`.
     ///
     /// # Returns
-    /// - `Ok(CharacterWorldData)` when the file exists and contains valid JSON.
+    /// - `Ok(CharacterWorldData)` when the file exists and contains valid JSON
+    ///   including animation mapping entries.
     /// - `Err(String)` with context if the file cannot be read or parsed.
     pub fn build_from_id(character_id: u64) -> Result<Self, String> {
         let path = character_definition_path(character_id);
@@ -43,7 +53,8 @@ impl CharacterWorldData {
     /// - `path`: The path of the JSON file to load.
     ///
     /// # Returns
-    /// - `Ok(CharacterWorldData)` if the file is readable and valid JSON.
+    /// - `Ok(CharacterWorldData)` if the file is readable and valid JSON including
+    ///   animation mappings.
     /// - `Err(String)` containing a descriptive error message otherwise.
     pub fn build_from_json<P: AsRef<Path>>(path: P) -> Result<Self, String> {
         let path = path.as_ref();

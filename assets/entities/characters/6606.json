@@ -2,5 +2,27 @@
   "localized_name": "lira",
   "display_name": "Lira",
   "full_name": "Lira",
-  "model_name": "lira.glb"
+  "model_name": "lira.glb",
+  "animations": [
+    {
+      "key": "idle",
+      "index": 1
+    },
+    {
+      "key": "walk",
+      "index": 5
+    },
+    {
+      "key": "sprint",
+      "index": 7
+    },
+    {
+      "key": "slow_walk",
+      "index": 3
+    },
+    {
+      "key": "jump",
+      "index": 2
+    }
+  ]
 }
