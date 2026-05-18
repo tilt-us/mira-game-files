@@ -279,3 +279,63 @@ fn follow_player_orbit_camera_reads_mouse_sensitivity_from_client_configs() {
         .expect("expected orbit component");
     assert_ne!(orbit.yaw, 0.0);
 }
+
+#[test]
+fn follow_player_orbit_camera_disables_motion_zoom_when_speed_is_zero_or_negative() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.add_message::<MouseMotion>();
+    app.add_message::<MouseWheel>();
+    app.add_systems(Update, follow_player_orbit_camera);
+
+    let player_entity = app.world_mut().spawn((
+        Player,
+        GlobalTransform::from_translation(Vec3::ZERO),
+        Transform::default(),
+        LinearVelocity::ZERO,
+    ));
+    let player_entity = player_entity.id();
+
+    let camera_entity = spawn_camera(
+        app.world_mut(),
+        Transform::from_xyz(-2.5, 2.0, 6.0).looking_at(Vec3::ZERO, Vec3::Y),
+    );
+    app.world_mut()
+        .entity_mut(camera_entity)
+        .insert(OrbitFollowCamera {
+            motion_zoom_speed: 0.0,
+            ..OrbitFollowCamera::default()
+        });
+
+    app.world_mut()
+        .resource_mut::<Time>()
+        .advance_by(Duration::from_secs_f32(1.0 / 60.0));
+    app.update();
+
+    let baseline_distance = app
+        .world()
+        .entity(camera_entity)
+        .get::<OrbitFollowCamera>()
+        .expect("expected orbit component")
+        .smoothed_distance;
+
+    app.world_mut()
+        .entity_mut(player_entity)
+        .insert(LinearVelocity(Vector::new(1000.0, 0.0, 0.0)));
+
+    for _ in 0..6 {
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(Duration::from_secs_f32(1.0 / 60.0));
+        app.update();
+    }
+
+    let orbit = app
+        .world()
+        .entity(camera_entity)
+        .get::<OrbitFollowCamera>()
+        .expect("expected orbit component");
+
+    assert!(orbit.smoothed_distance.is_finite());
+    assert!((orbit.smoothed_distance - baseline_distance).abs() < 0.0001);
+}

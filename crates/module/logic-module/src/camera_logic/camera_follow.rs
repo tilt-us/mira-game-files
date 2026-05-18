@@ -106,7 +106,11 @@ pub fn follow_player_orbit_camera(
     let player_speed = player_velocity
         .map(|velocity| Vec2::new(velocity.x, velocity.z).length())
         .unwrap_or(0.0);
-    let motion_zoom_factor = (player_speed / orbit.motion_zoom_speed).clamp(0.0, 1.0);
+    let motion_zoom_factor = if orbit.motion_zoom_speed > f32::EPSILON {
+        (player_speed / orbit.motion_zoom_speed).clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
     let desired_distance = (orbit.distance - orbit.motion_zoom_in_distance * motion_zoom_factor)
         .clamp(orbit.min_distance, orbit.max_distance);
 
