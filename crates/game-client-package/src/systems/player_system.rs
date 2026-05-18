@@ -3,6 +3,9 @@ use bevy::prelude::*;
 use game_shared::config::ClientConfigs;
 use game_shared::models::http::account::AccountResource;
 use game_shared::models::player::PlayerMovementInputConfig;
+use logic_module::player_logic::character_animation::{
+    setup_character_animation, update_character_animation_state,
+};
 use logic_module::player_logic::player_load::gen_player_from_response;
 use logic_module::player_logic::player_movement::{
     party_companion_follow, player_movement_detect, update_player_grounded,
@@ -54,8 +57,20 @@ impl Plugin for PlayerSystemComponent {
 
         app.add_systems(
             Update,
-            (update_player_grounded, player_movement_detect, party_companion_follow)
+            setup_character_animation
+                .run_if(in_state(ClientState::WindowVisible)),
+        );
+
+        app.add_systems(
+            Update,
+            (
+                update_player_grounded,
+                player_movement_detect,
+                party_companion_follow,
+                update_character_animation_state,
+            )
                 .chain()
+                .after(setup_character_animation)
                 .run_if(in_state(ClientState::WindowVisible))
                 .run_if(resource_exists::<PlayerMovementInputConfig>),
         );

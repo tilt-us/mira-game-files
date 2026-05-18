@@ -31,7 +31,17 @@ fn create_character_definition_for_id(character_id: u64) -> CharacterDefinitionC
   "localized_name": "test-localized",
   "display_name": "Test Display",
   "full_name": "Test Full",
-  "model_name": "test.glb"
+  "model_name": "test.glb",
+  "animations": [
+    {
+      "key": "idle",
+      "index": 0
+    },
+    {
+      "key": "walk",
+      "index": 1
+    }
+  ]
 }"#;
 
     fs::write(path, json).expect("failed to create character test json");
@@ -61,6 +71,9 @@ fn build_from_json_reads_character_definition() {
     assert_eq!(world_data.display_name, "Lira");
     assert_eq!(world_data.full_name, "Lira");
     assert_eq!(world_data.model_name, "lira.glb");
+    assert_eq!(world_data.animations.len(), 5);
+    assert_eq!(world_data.animations[0].key, "idle");
+    assert_eq!(world_data.animations[0].index, 1);
 }
 
 #[test]
@@ -76,6 +89,9 @@ fn build_from_id_reads_existing_character_definition() {
     assert_eq!(world_data.display_name, "Test Display");
     assert_eq!(world_data.full_name, "Test Full");
     assert_eq!(world_data.model_name, "test.glb");
+    assert_eq!(world_data.animations.len(), 2);
+    assert_eq!(world_data.animations[1].key, "walk");
+    assert_eq!(world_data.animations[1].index, 1);
 }
 
 #[test]

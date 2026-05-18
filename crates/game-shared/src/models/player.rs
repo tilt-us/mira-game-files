@@ -39,9 +39,9 @@ pub struct PlayerMovementStats {
 impl Default for PlayerMovementStats {
     fn default() -> Self {
         Self {
-            walk_speed: 5.2,
+            walk_speed: 4.8,
             run_speed: 8.6,
-            sneak_speed: 2.4,
+            sneak_speed: 1.4,
             jump_velocity: 6.4,
             ground_acceleration: 34.0,
             air_acceleration: 11.0,

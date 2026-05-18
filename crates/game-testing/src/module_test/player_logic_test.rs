@@ -49,7 +49,7 @@ fn create_character_definition_for_id(
 
     let path = base_dir.join(format!("{character_id}.json"));
     let json = format!(
-        "{{\n  \"localized_name\": \"{}\",\n  \"display_name\": \"{}\",\n  \"full_name\": \"{}\",\n  \"model_name\": \"{}\"\n}}",
+        "{{\n  \"localized_name\": \"{}\",\n  \"display_name\": \"{}\",\n  \"full_name\": \"{}\",\n  \"model_name\": \"{}\",\n  \"animations\": [\n    {{\n      \"key\": \"idle\",\n      \"index\": 0\n    }}\n  ]\n}}",
         display_name.to_lowercase(),
         display_name,
         display_name,

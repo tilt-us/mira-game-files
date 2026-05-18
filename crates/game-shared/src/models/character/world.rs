@@ -1,3 +1,4 @@
+use super::CharacterAnimation;
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
 
@@ -5,7 +6,8 @@ use std::path::{Path, PathBuf};
 ///
 /// These fields are intentionally decoupled from account payloads. Account responses
 /// provide ownership and progression data (for example ID and level), while this
-/// structure provides static character presentation and model mapping data.
+/// structure provides static character presentation, model mapping, and animation
+/// mapping data.
 ///
 /// # File Format
 /// A character definition JSON must provide:
@@ -13,12 +15,25 @@ use std::path::{Path, PathBuf};
 /// - `display_name`: player-facing short name.
 /// - `full_name`: canonical character name.
 /// - `model_name`: model file name (for example, `lira.glb`).
+///
+/// Optional:
+/// - `animations`: animation mappings with clip keys and GLB animation indices
+///   (defaults to an empty list when omitted).
 #[derive(Deserialize, Debug, Clone, Default)]
 pub struct CharacterWorldData {
+    /// Internal or localized identifier text.
     pub localized_name: String,
+    /// Player-facing short name.
     pub display_name: String,
+    /// Canonical character name.
     pub full_name: String,
+    /// GLB file name used for scene and animation loading.
     pub model_name: String,
+    /// Mapping from logical animation keys to GLB animation indices.
+    ///
+    /// Defaults to an empty list when the key is missing in legacy JSON files.
+    #[serde(default)]
+    pub animations: Vec<CharacterAnimation>,
 }
 
 impl CharacterWorldData {

@@ -1,1 +1,2 @@
+mod character_animation_model_test;
 mod character_world_data_test;
