@@ -442,6 +442,16 @@ pub struct InputConfig {
     #[serde(default)]
     movement_sneak: String,
     #[serde(default)]
+    party_slot_01: String,
+    #[serde(default)]
+    party_slot_02: String,
+    #[serde(default)]
+    party_slot_03: String,
+    #[serde(default)]
+    party_slot_04: String,
+    #[serde(default)]
+    party_next_slot: String,
+    #[serde(default)]
     mouse_sensitivity_vertical: f32,
     #[serde(default)]
     mouse_sensitivity_horizontal: f32,
@@ -497,6 +507,31 @@ impl InputConfig {
         &self.movement_sneak
     }
 
+    /// Returns the binding used for party slot 01.
+    pub fn party_slot_01(&self) -> &str {
+        &self.party_slot_01
+    }
+
+    /// Returns the binding used for party slot 02.
+    pub fn party_slot_02(&self) -> &str {
+        &self.party_slot_02
+    }
+
+    /// Returns the binding used for party slot 03.
+    pub fn party_slot_03(&self) -> &str {
+        &self.party_slot_03
+    }
+
+    /// Returns the binding used for party slot 04.
+    pub fn party_slot_04(&self) -> &str {
+        &self.party_slot_04
+    }
+
+    /// Returns the binding used for selecting the next available party slot.
+    pub fn party_next_slot(&self) -> &str {
+        &self.party_next_slot
+    }
+
     /// Returns the binding used for opening the menu.
     pub fn open_menu(&self) -> &str {
         &self.open_menu
@@ -543,6 +578,11 @@ impl Default for InputConfig {
             movement_jump: String::from("Space"),
             movement_sprint: String::from("ShiftLeft"),
             movement_sneak: String::from("CtrlLeft"),
+            party_slot_01: String::from("1"),
+            party_slot_02: String::from("2"),
+            party_slot_03: String::from("3"),
+            party_slot_04: String::from("4"),
+            party_next_slot: String::from("Q"),
             mouse_sensitivity_vertical: 1.0,
             mouse_sensitivity_horizontal: 1.0,
             interact: String::from("F"),

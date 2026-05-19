@@ -6,7 +6,7 @@ use game_shared::models::character::group::CharacterGroup;
 use game_shared::models::character::world::CharacterWorldData;
 use game_shared::models::http::account::AccountResource;
 use game_shared::models::player::{
-    PartyCompanion, PartySpawnedCharacter, Player, PlayerMovementStats,
+    PartyCompanion, PartySlot, PartySpawnedCharacter, Player, PlayerMovementStats,
 };
 use game_shared::models::world::TestWorldFloor;
 use std::f32::consts::PI;
@@ -55,9 +55,13 @@ pub fn place_to_world(
     character_group: Res<CharacterGroup>,
     asset_server: Res<AssetServer>,
     existing_party_entities: Query<Entity, Or<(With<Player>, With<PartyCompanion>)>>,
-    static_collider_query: Query<
-        (Entity, &Transform, &Collider, Option<&RigidBody>, Has<TestWorldFloor>),
-    >,
+    static_collider_query: Query<(
+        Entity,
+        &Transform,
+        &Collider,
+        Option<&RigidBody>,
+        Has<TestWorldFloor>,
+    )>,
 ) {
     for entity in &existing_party_entities {
         commands.entity(entity).despawn_children().despawn();
@@ -104,6 +108,7 @@ pub fn place_to_world(
         &asset_server,
         active_character.clone(),
         world_data.clone(),
+        character_slot_index(&character_group, active_character_id),
     );
 
     let mut occupied_party_positions = vec![PLAYER_SPAWN_POSITION];
@@ -140,7 +145,14 @@ pub fn place_to_world(
         };
 
         occupied_party_positions.push(position);
-        spawn_party_companion(&mut commands, &asset_server, companion.clone(), world_data, position);
+        spawn_party_companion(
+            &mut commands,
+            &asset_server,
+            companion.clone(),
+            world_data,
+            position,
+            character_slot_index(&character_group, companion.base.id),
+        );
     }
 
     info!(
@@ -178,6 +190,7 @@ fn spawn_party_player(
     asset_server: &AssetServer,
     character: game_shared::models::character::Character,
     world_data: CharacterWorldData,
+    party_slot_index: u8,
 ) {
     let model_asset_path = format!("dev/models/{}", world_data.model_name);
     let scene: Handle<Scene> = asset_server.load(format!("{model_asset_path}#Scene0"));
@@ -187,12 +200,14 @@ fn spawn_party_player(
     };
 
     let collider = Collider::capsule(0.4, 1.0);
-    let mut ground_probe_shape = collider.clone();
-    ground_probe_shape.set_scale(Vector::ONE * 0.98, 10);
+    let ground_probe = build_ground_probe(&collider);
 
     commands
         .spawn((
             PartySpawnedCharacter,
+            PartySlot {
+                index: party_slot_index,
+            },
             Player,
             character,
             PlayerMovementStats::default(),
@@ -205,15 +220,9 @@ fn spawn_party_player(
             LinearVelocity::ZERO,
             Friction::ZERO.with_combine_rule(CoefficientCombine::Min),
             GravityScale(2.0),
-            ShapeCaster::new(
-                ground_probe_shape,
-                Vector::ZERO,
-                Quaternion::default(),
-                Dir3::NEG_Y,
-            )
-            .with_max_distance(0.3),
-            animation_loadout,
+            ground_probe,
         ))
+        .insert(animation_loadout)
         .insert((
             Visibility::default(),
             InheritedVisibility::default(),
@@ -250,6 +259,7 @@ fn spawn_party_companion(
     character: game_shared::models::character::Character,
     world_data: CharacterWorldData,
     position: Vec3,
+    party_slot_index: u8,
 ) {
     let model_asset_path = format!("dev/models/{}", world_data.model_name);
     let scene: Handle<Scene> = asset_server.load(format!("{model_asset_path}#Scene0"));
@@ -258,22 +268,30 @@ fn spawn_party_companion(
         clips: world_data.animations.clone(),
     };
 
+    let collider = Collider::capsule(0.4, 1.0);
+    let ground_probe = build_ground_probe(&collider);
+
     commands
         .spawn((
             PartySpawnedCharacter,
+            PartySlot {
+                index: party_slot_index,
+            },
             PartyCompanion,
             character,
+            PlayerMovementStats::default(),
             Name::new(world_data.display_name),
             Transform::from_translation(position),
             RigidBody::Dynamic,
-            Collider::capsule(0.4, 1.0),
+            collider,
             CollisionLayers::from_bits(LAYER_COMPANION, LAYER_WORLD),
             LockedAxes::ROTATION_LOCKED,
             LinearVelocity::ZERO,
             Friction::ZERO.with_combine_rule(CoefficientCombine::Min),
             GravityScale(2.0),
-            animation_loadout,
+            ground_probe,
         ))
+        .insert(animation_loadout)
         .insert((
             Visibility::default(),
             InheritedVisibility::default(),
@@ -288,6 +306,26 @@ fn spawn_party_companion(
         });
 }
 
+fn character_slot_index(character_group: &CharacterGroup, character_id: u64) -> u8 {
+    character_group
+        .characters
+        .iter()
+        .position(|character| character.base.id == character_id)
+        .map(|index| (index + 1).clamp(1, 255) as u8)
+        .unwrap_or(1)
+}
+
+fn build_ground_probe(collider: &Collider) -> ShapeCaster {
+    let mut ground_probe_shape = collider.clone();
+    ground_probe_shape.set_scale(Vector::ONE * 0.98, 10);
+    ShapeCaster::new(
+        ground_probe_shape,
+        Vector::ZERO,
+        Quaternion::default(),
+        Dir3::NEG_Y,
+    )
+    .with_max_distance(0.3)
+}
 
 /// Finds a suitable spawn position for a companion character near a center location.
 ///
@@ -328,9 +366,13 @@ fn find_companion_spawn_position(
     center: Vec3,
     character_id: u64,
     occupied_party_positions: &[Vec3],
-    static_collider_query: &Query<
-        (Entity, &Transform, &Collider, Option<&RigidBody>, Has<TestWorldFloor>),
-    >,
+    static_collider_query: &Query<(
+        Entity,
+        &Transform,
+        &Collider,
+        Option<&RigidBody>,
+        Has<TestWorldFloor>,
+    )>,
     excluded_entities: &[Entity],
 ) -> Option<Vec3> {
     let seed = seed_to_unit_interval(character_id);
@@ -393,9 +435,13 @@ fn find_companion_spawn_position(
 fn is_spawn_position_clear(
     candidate: Vec3,
     occupied_party_positions: &[Vec3],
-    static_collider_query: &Query<
-        (Entity, &Transform, &Collider, Option<&RigidBody>, Has<TestWorldFloor>),
-    >,
+    static_collider_query: &Query<(
+        Entity,
+        &Transform,
+        &Collider,
+        Option<&RigidBody>,
+        Has<TestWorldFloor>,
+    )>,
     excluded_entities: &[Entity],
 ) -> bool {
     if occupied_party_positions
@@ -418,12 +464,8 @@ fn is_spawn_position_clear(
             continue;
         }
 
-        let distance = collider.distance_to_point(
-            transform.translation,
-            transform.rotation,
-            candidate,
-            true,
-        );
+        let distance =
+            collider.distance_to_point(transform.translation, transform.rotation, candidate, true);
 
         if distance < COMPANION_SOLID_CLEARANCE {
             return false;

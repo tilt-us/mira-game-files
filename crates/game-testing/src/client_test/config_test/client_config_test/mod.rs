@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::test_utils::cwd_lock;
-use game_shared::config::{ClientConfigs, GeneralConfig, GraphicsConfig};
+use game_shared::config::{ClientConfigs, GeneralConfig, GraphicsConfig, InputConfig};
 
 fn create_temp_test_dir() -> PathBuf {
     let now = SystemTime::now()
@@ -66,6 +66,11 @@ fn ensure_config_files_exists_creates_default_toml_files() {
         assert_eq!(loaded.config_graphics.graphic_backend, "AUTO");
         assert_eq!(loaded.config_graphics.ui_scale, "3");
         assert!(!loaded.config_graphics.fullscreen);
+        assert_eq!(loaded.config_input.party_slot_01(), "1");
+        assert_eq!(loaded.config_input.party_slot_02(), "2");
+        assert_eq!(loaded.config_input.party_slot_03(), "3");
+        assert_eq!(loaded.config_input.party_slot_04(), "4");
+        assert_eq!(loaded.config_input.party_next_slot(), "Q");
     });
 }
 
@@ -103,9 +108,12 @@ fn load_reads_typed_config_file() {
 
         let general: GeneralConfig = ClientConfigs::load("config/client_general.toml");
         let graphics: GraphicsConfig = ClientConfigs::load("config/client_graphics.toml");
+        let input: InputConfig = ClientConfigs::load("config/client_input.toml");
 
         assert_eq!(general.language, "english");
         assert_eq!(graphics.window_width, 1270);
         assert_eq!(graphics.window_height, 720);
+        assert_eq!(input.party_slot_01(), "1");
+        assert_eq!(input.party_next_slot(), "Q");
     });
 }

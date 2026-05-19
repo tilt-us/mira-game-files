@@ -12,6 +12,12 @@ pub struct PartySpawnedCharacter;
 #[derive(Component, Debug, Clone)]
 pub struct PartyCompanion;
 
+/// Stable party position used for character slot swaps (1-based).
+#[derive(Component, Debug, Clone)]
+pub struct PartySlot {
+    pub index: u8,
+}
+
 /// Marker component indicating that the player currently has ground contact.
 #[derive(Component, Debug, Clone)]
 #[component(storage = "SparseSet")]
@@ -73,6 +79,28 @@ impl Default for PlayerMovementInputConfig {
             movement_jump: String::from("Space"),
             movement_sprint: String::from("ShiftLeft"),
             movement_sneak: String::from("CtrlLeft"),
+        }
+    }
+}
+
+/// Resource containing slot-swap input bindings.
+#[derive(Resource, Debug, Clone)]
+pub struct PlayerPartyInputConfig {
+    pub party_slot_01: String,
+    pub party_slot_02: String,
+    pub party_slot_03: String,
+    pub party_slot_04: String,
+    pub party_next_slot: String,
+}
+
+impl Default for PlayerPartyInputConfig {
+    fn default() -> Self {
+        Self {
+            party_slot_01: String::from("1"),
+            party_slot_02: String::from("2"),
+            party_slot_03: String::from("3"),
+            party_slot_04: String::from("4"),
+            party_next_slot: String::from("Q"),
         }
     }
 }

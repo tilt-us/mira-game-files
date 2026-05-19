@@ -1,8 +1,10 @@
+use avian3d::prelude::LinearVelocity;
 use bevy::input::mouse::{MouseMotion, MouseScrollUnit, MouseWheel};
 use bevy::prelude::*;
 use game_shared::config::ClientConfigs;
 use game_shared::models::camera::OrbitFollowCamera;
 use game_shared::models::player::Player;
+use std::f32::consts::{PI, TAU};
 
 /// Ensures that every 3D camera has an [`OrbitFollowCamera`] controller component.
 ///
@@ -32,13 +34,14 @@ pub fn init_orbit_follow_camera(
 ///   `InputConfig.mouse_sensitivity_vertical`.
 /// - The camera always looks at the player target point.
 pub fn follow_player_orbit_camera(
+    time: Res<Time>,
     mut mouse_motion_events: MessageReader<MouseMotion>,
     mut mouse_wheel_events: MessageReader<MouseWheel>,
     client_configs: Option<Res<ClientConfigs>>,
-    player_query: Query<&GlobalTransform, With<Player>>,
+    player_query: Query<(&GlobalTransform, Option<&LinearVelocity>), With<Player>>,
     mut camera_query: Query<(&mut Transform, &mut OrbitFollowCamera), With<Camera3d>>,
 ) {
-    let Some(player_transform) = player_query.iter().next() else {
+    let Some((player_transform, player_velocity)) = player_query.iter().next() else {
         return;
     };
 
@@ -60,6 +63,10 @@ pub fn follow_player_orbit_camera(
                 .clamp(orbit.min_pitch, orbit.max_pitch);
         }
 
+        orbit.smoothed_yaw = orbit.yaw;
+        orbit.smoothed_pitch = orbit.pitch;
+        orbit.smoothed_distance = orbit.distance;
+        orbit.smoothed_target = target;
         orbit.initialized = true;
     }
 
@@ -96,13 +103,44 @@ pub fn follow_player_orbit_camera(
             .clamp(orbit.min_distance, orbit.max_distance);
     }
 
-    let horizontal = orbit.distance * orbit.pitch.cos();
-    let offset = Vec3::new(
-        horizontal * orbit.yaw.sin(),
-        orbit.distance * orbit.pitch.sin(),
-        horizontal * orbit.yaw.cos(),
+    let player_speed = player_velocity
+        .map(|velocity| Vec2::new(velocity.x, velocity.z).length())
+        .unwrap_or(0.0);
+    let motion_zoom_factor = if orbit.motion_zoom_speed > f32::EPSILON {
+        (player_speed / orbit.motion_zoom_speed).clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
+    let desired_distance = (orbit.distance - orbit.motion_zoom_in_distance * motion_zoom_factor)
+        .clamp(orbit.min_distance, orbit.max_distance);
+
+    let smoothing_alpha = 1.0 - (-orbit.follow_smoothness * time.delta_secs()).exp();
+    let rotation_alpha = 1.0 - (-orbit.rotation_smoothness * time.delta_secs()).exp();
+    let zoom_alpha = 1.0 - (-orbit.zoom_smoothness * time.delta_secs()).exp();
+
+    orbit.smoothed_yaw = smooth_angle(orbit.smoothed_yaw, orbit.yaw, rotation_alpha);
+    orbit.smoothed_pitch = orbit.smoothed_pitch.lerp(orbit.pitch, rotation_alpha);
+    orbit.smoothed_distance = orbit.smoothed_distance.lerp(desired_distance, zoom_alpha);
+    orbit.smoothed_target = orbit
+        .smoothed_target
+        .lerp(target, smoothing_alpha.clamp(0.0, 1.0));
+
+    let horizontal = orbit.smoothed_distance * orbit.smoothed_pitch.cos();
+    let smoothed_offset = Vec3::new(
+        horizontal * orbit.smoothed_yaw.sin(),
+        orbit.smoothed_distance * orbit.smoothed_pitch.sin(),
+        horizontal * orbit.smoothed_yaw.cos(),
     );
 
-    camera_transform.translation = target + offset;
-    camera_transform.look_at(target, Vec3::Y);
+    camera_transform.translation = orbit.smoothed_target + smoothed_offset;
+    camera_transform.look_at(orbit.smoothed_target, Vec3::Y);
+}
+
+fn smooth_angle(current: f32, target: f32, alpha: f32) -> f32 {
+    let delta = wrap_angle(target - current);
+    current + delta * alpha.clamp(0.0, 1.0)
+}
+
+fn wrap_angle(angle: f32) -> f32 {
+    (angle + PI).rem_euclid(TAU) - PI
 }
