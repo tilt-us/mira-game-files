@@ -1,6 +1,8 @@
 use avian3d::prelude::{Collider, RigidBody};
 use bevy::prelude::*;
-use game_shared::models::world::{TestWorldFloor, TestWorldLight, TestWorldObstacle, TestWorldWall};
+use game_shared::models::world::{
+    TestWorldFloor, TestWorldLight, TestWorldObstacle, TestWorldWall,
+};
 
 /// Spawns a simple test world containing a floor plate and a daylight source.
 ///

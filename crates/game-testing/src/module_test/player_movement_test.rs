@@ -44,14 +44,16 @@ fn update_player_grounded_inserts_and_removes_marker() {
 
     app.update();
 
-    assert!(app
-        .world()
-        .entity(grounded_entity)
-        .contains::<PlayerGrounded>());
-    assert!(!app
-        .world()
-        .entity(airborne_entity)
-        .contains::<PlayerGrounded>());
+    assert!(
+        app.world()
+            .entity(grounded_entity)
+            .contains::<PlayerGrounded>()
+    );
+    assert!(
+        !app.world()
+            .entity(airborne_entity)
+            .contains::<PlayerGrounded>()
+    );
 }
 
 #[test]
@@ -383,15 +385,17 @@ fn swap_active_party_character_switches_to_requested_slot() {
     app.update();
 
     assert!(!app.world().entity(previous_player).contains::<Player>());
-    assert!(app
-        .world()
-        .entity(previous_player)
-        .contains::<PartyCompanion>());
+    assert!(
+        app.world()
+            .entity(previous_player)
+            .contains::<PartyCompanion>()
+    );
     assert!(app.world().entity(requested_player).contains::<Player>());
-    assert!(!app
-        .world()
-        .entity(requested_player)
-        .contains::<PartyCompanion>());
+    assert!(
+        !app.world()
+            .entity(requested_player)
+            .contains::<PartyCompanion>()
+    );
     assert_eq!(
         app.world()
             .entity(previous_player)
@@ -427,10 +431,11 @@ fn swap_active_party_character_ignores_missing_slot() {
     app.update();
 
     assert!(app.world().entity(player_entity).contains::<Player>());
-    assert!(!app
-        .world()
-        .entity(player_entity)
-        .contains::<PartyCompanion>());
+    assert!(
+        !app.world()
+            .entity(player_entity)
+            .contains::<PartyCompanion>()
+    );
 }
 
 #[test]
@@ -501,10 +506,11 @@ fn swap_active_party_character_next_slot_does_nothing_without_companions() {
     app.update();
 
     assert!(app.world().entity(player_entity).contains::<Player>());
-    assert!(!app
-        .world()
-        .entity(player_entity)
-        .contains::<PartyCompanion>());
+    assert!(
+        !app.world()
+            .entity(player_entity)
+            .contains::<PartyCompanion>()
+    );
 }
 
 #[test]
@@ -526,10 +532,11 @@ fn swap_active_party_character_ignores_same_slot_selection() {
     app.update();
 
     assert!(app.world().entity(player_entity).contains::<Player>());
-    assert!(!app
-        .world()
-        .entity(player_entity)
-        .contains::<PartyCompanion>());
+    assert!(
+        !app.world()
+            .entity(player_entity)
+            .contains::<PartyCompanion>()
+    );
 }
 
 #[test]
@@ -551,10 +558,11 @@ fn swap_active_party_character_returns_when_no_active_player_exists() {
     }
     app.update();
 
-    assert!(app
-        .world()
-        .entity(companion_entity)
-        .contains::<PartyCompanion>());
+    assert!(
+        app.world()
+            .entity(companion_entity)
+            .contains::<PartyCompanion>()
+    );
     assert!(!app.world().entity(companion_entity).contains::<Player>());
 }
 
@@ -578,10 +586,11 @@ fn swap_active_party_character_supports_third_slot_binding() {
     }
     app.update();
 
-    assert!(app
-        .world()
-        .entity(previous_player)
-        .contains::<PartyCompanion>());
+    assert!(
+        app.world()
+            .entity(previous_player)
+            .contains::<PartyCompanion>()
+    );
     assert!(app.world().entity(requested_player).contains::<Player>());
 }
 
@@ -602,10 +611,11 @@ fn swap_active_party_character_does_nothing_without_swap_input() {
     app.update();
 
     assert!(app.world().entity(player_entity).contains::<Player>());
-    assert!(app
-        .world()
-        .entity(companion_entity)
-        .contains::<PartyCompanion>());
+    assert!(
+        app.world()
+            .entity(companion_entity)
+            .contains::<PartyCompanion>()
+    );
 }
 
 #[test]

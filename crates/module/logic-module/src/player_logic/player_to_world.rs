@@ -1,6 +1,7 @@
 use avian3d::{math::*, prelude::*};
 use bevy::prelude::*;
 use bevy::scene::SceneRoot;
+use game_shared::models::camera::CameraOcclusionFade;
 use game_shared::models::character::animation::CharacterAnimationLoadout;
 use game_shared::models::character::group::CharacterGroup;
 use game_shared::models::character::world::CharacterWorldData;
@@ -222,6 +223,7 @@ fn spawn_party_player(
             GravityScale(2.0),
             ground_probe,
         ))
+        .insert(CameraOcclusionFade::default())
         .insert(animation_loadout)
         .insert((
             Visibility::default(),
@@ -291,6 +293,7 @@ fn spawn_party_companion(
             GravityScale(2.0),
             ground_probe,
         ))
+        .insert(CameraOcclusionFade::default())
         .insert(animation_loadout)
         .insert((
             Visibility::default(),

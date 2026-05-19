@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 
 use crate::test_utils::window_count;
-use game_shared::models::world::{TestWorldFloor, TestWorldLight, TestWorldObstacle, TestWorldWall};
+use game_shared::models::world::{
+    TestWorldFloor, TestWorldLight, TestWorldObstacle, TestWorldWall,
+};
 use world_module::spawn_test_world;
 
 #[test]

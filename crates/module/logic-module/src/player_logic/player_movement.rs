@@ -4,7 +4,7 @@ use game_shared::models::player::{
     PartyCompanion, PartySlot, Player, PlayerGrounded, PlayerMovementInputConfig,
     PlayerMovementStats, PlayerPartyInputConfig,
 };
-use game_shared::utils::input_utils::{convert_string_to_key_code, fetch_key_code, KeyType};
+use game_shared::utils::input_utils::{KeyType, convert_string_to_key_code, fetch_key_code};
 use std::f32::consts::PI;
 
 const PLAYER_TURN_SPEED_RAD_PER_SEC: f32 = 10.0;
