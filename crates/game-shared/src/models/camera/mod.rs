@@ -1,4 +1,6 @@
+use bevy::pbr::StandardMaterial;
 use bevy::prelude::*;
+use bevy::render::alpha::AlphaMode;
 
 /// Orbit camera state used to follow and rotate around the active player.
 #[derive(Component, Debug, Clone)]
@@ -100,6 +102,29 @@ impl Default for CameraOcclusionFade {
             current_alpha: 1.0,
         }
     }
+}
+
+/// Marker added to mesh entities to reference the party character root that owns the material.
+#[derive(Component, Debug, Clone, Copy)]
+pub struct OcclusionFadeMaterialOwner {
+    /// Root party-character entity owning this submesh/material.
+    pub root: Entity,
+}
+
+/// Binding data used to drive per-submesh opacity for camera occlusion.
+///
+/// Each GLTF submesh receives its own material instance and this component stores
+/// the owning character root entity plus baseline material data used during fades.
+#[derive(Component, Debug, Clone)]
+pub struct OcclusionFadeMaterialBinding {
+    /// Owning party-character root that exposes [`CameraOcclusionFade`].
+    pub owner_root: Entity,
+    /// Unique material handle used by this specific submesh instance.
+    pub material: Handle<StandardMaterial>,
+    /// Alpha value of the source material before runtime occlusion fades.
+    pub base_alpha: f32,
+    /// Alpha mode of the source material before runtime occlusion fades.
+    pub base_alpha_mode: AlphaMode,
 }
 
 /// Resource tracking whether the in-game menu is open for cursor mode control.
