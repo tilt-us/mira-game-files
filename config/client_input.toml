@@ -34,6 +34,7 @@ party_slot_01 = "1"
 party_slot_02 = "2"
 party_slot_03 = "3"
 party_slot_04 = "4"
+# Party next slot (Default Q)
 party_next_slot = "Q"
 
 # Camera Rotation speed for vertical and horizontal movement (yaw | pitch). (Default both: 1.0)

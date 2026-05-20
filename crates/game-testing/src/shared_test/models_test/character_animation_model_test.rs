@@ -32,10 +32,7 @@ fn node_for_state_uses_expected_fallback_chains() {
         nodes.node_for_state(CharacterAnimationState::Sprint),
         Some(node(3))
     );
-    assert_eq!(
-        nodes.node_for_state(CharacterAnimationState::Jump),
-        None
-    );
+    assert_eq!(nodes.node_for_state(CharacterAnimationState::Jump), None);
 }
 
 #[test]

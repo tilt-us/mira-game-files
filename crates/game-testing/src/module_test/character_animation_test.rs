@@ -263,10 +263,9 @@ fn update_character_animation_state_keeps_player_idle_without_input() {
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let animation_player_entity = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let animation_player_entity = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let animation_player_entity = animation_player_entity.id();
 
     let character_entity = app.world_mut().spawn((
@@ -301,10 +300,9 @@ fn update_character_animation_state_transitions_player_to_jump_when_airborne() {
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let animation_player_entity = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let animation_player_entity = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let animation_player_entity = animation_player_entity.id();
 
     let character_entity = app.world_mut().spawn((
@@ -338,10 +336,9 @@ fn update_character_animation_state_switches_player_to_sprint_on_input() {
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let animation_player_entity = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let animation_player_entity = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let animation_player_entity = animation_player_entity.id();
 
     let character_entity = app.world_mut().spawn((
@@ -382,10 +379,9 @@ fn update_character_animation_state_keeps_state_when_no_supported_nodes_exist() 
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let animation_player_entity = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let animation_player_entity = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let animation_player_entity = animation_player_entity.id();
 
     let character_entity = app.world_mut().spawn((
@@ -458,10 +454,9 @@ fn update_character_animation_state_starts_missing_active_animation_for_same_sta
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let animation_player_entity = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let animation_player_entity = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let animation_player_entity = animation_player_entity.id();
 
     let nodes = test_nodes();
@@ -517,10 +512,9 @@ fn update_character_animation_state_uses_slow_walk_for_sneaking_player() {
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let animation_player_entity = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let animation_player_entity = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let animation_player_entity = animation_player_entity.id();
 
     let character_entity = app.world_mut().spawn((
@@ -561,10 +555,9 @@ fn update_character_animation_state_uses_walk_for_moving_player_without_sprint_o
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let animation_player_entity = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let animation_player_entity = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let animation_player_entity = animation_player_entity.id();
 
     let character_entity = app.world_mut().spawn((
@@ -604,10 +597,9 @@ fn update_character_animation_state_uses_slow_walk_for_low_speed_player_motion()
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let animation_player_entity = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let animation_player_entity = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let animation_player_entity = animation_player_entity.id();
 
     let character_entity = app.world_mut().spawn((
@@ -647,10 +639,9 @@ fn update_character_animation_state_uses_companion_speed_bands_for_non_idle_play
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let player_animation_player = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let player_animation_player = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let player_animation_player = player_animation_player.id();
     app.world_mut().spawn((
         Player,
@@ -743,17 +734,17 @@ fn update_character_animation_state_uses_companion_speed_bands_for_non_idle_play
 }
 
 #[test]
-fn update_character_animation_state_sets_idle_for_very_slow_companion_and_jump_for_vertical_motion() {
+fn update_character_animation_state_sets_idle_for_very_slow_companion_and_jump_for_vertical_motion()
+{
     let mut app = App::new();
     app.add_plugins(MinimalPlugins);
     app.insert_resource(ButtonInput::<KeyCode>::default());
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let player_animation_player = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let player_animation_player = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let player_animation_player = player_animation_player.id();
     app.world_mut().spawn((
         Player,
@@ -831,10 +822,9 @@ fn update_character_animation_state_uses_distance_thresholds_for_idle_player_com
     app.insert_resource(PlayerMovementInputConfig::default());
     app.add_systems(Update, update_character_animation_state);
 
-    let player_animation_player = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let player_animation_player = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let player_animation_player = player_animation_player.id();
     let player_entity = app.world_mut().spawn((
         Player,
@@ -850,10 +840,9 @@ fn update_character_animation_state_uses_distance_thresholds_for_idle_player_com
     ));
     let _player_entity = player_entity.id();
 
-    let companion_a_animation_player = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let companion_a_animation_player = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let companion_a_animation_player = companion_a_animation_player.id();
     let companion_a = app.world_mut().spawn((
         Transform::from_xyz(4.0, 0.0, 0.0),
@@ -866,10 +855,9 @@ fn update_character_animation_state_uses_distance_thresholds_for_idle_player_com
     ));
     let companion_a = companion_a.id();
 
-    let companion_b_animation_player = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let companion_b_animation_player = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let companion_b_animation_player = companion_b_animation_player.id();
     let companion_b = app.world_mut().spawn((
         Transform::from_xyz(7.0, 0.0, 0.0),
@@ -882,10 +870,9 @@ fn update_character_animation_state_uses_distance_thresholds_for_idle_player_com
     ));
     let companion_b = companion_b.id();
 
-    let companion_c_animation_player = app.world_mut().spawn((
-        AnimationPlayer::default(),
-        AnimationTransitions::new(),
-    ));
+    let companion_c_animation_player = app
+        .world_mut()
+        .spawn((AnimationPlayer::default(), AnimationTransitions::new()));
     let companion_c_animation_player = companion_c_animation_player.id();
     let companion_c = app.world_mut().spawn((
         Transform::from_xyz(9.5, 0.0, 0.0),

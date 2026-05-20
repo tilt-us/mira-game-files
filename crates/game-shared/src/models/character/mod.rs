@@ -3,9 +3,9 @@ pub mod group;
 pub mod world;
 
 use crate::models::EntityBase;
+pub use animation::CharacterAnimation;
 use bevy::prelude::*;
 use group::CharacterGroup;
-pub use animation::CharacterAnimation;
 
 pub struct CharacterApp;
 

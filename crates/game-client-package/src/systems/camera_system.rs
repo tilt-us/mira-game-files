@@ -24,11 +24,11 @@ impl Plugin for CameraSystemComponent {
         );
         app.add_systems(
             Update,
-            (
-                follow_player_orbit_camera,
-                toggle_cursor_lock_with_open_menu,
-            )
-                .run_if(in_state(ClientState::WindowVisible)),
+            follow_player_orbit_camera.run_if(in_state(ClientState::WindowVisible)),
+        );
+        app.add_systems(
+            Update,
+            toggle_cursor_lock_with_open_menu.run_if(in_state(ClientState::WindowVisible)),
         );
     }
 }

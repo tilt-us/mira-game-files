@@ -1,3 +1,4 @@
+use crate::player_logic::player_movement::is_binding_pressed;
 use avian3d::prelude::LinearVelocity;
 use bevy::gltf::GltfAssetLabel;
 use bevy::prelude::*;
@@ -5,9 +6,10 @@ use game_shared::models::character::animation::{
     CharacterAnimationController, CharacterAnimationLoadout, CharacterAnimationNodes,
     CharacterAnimationState,
 };
-use game_shared::models::player::{Player, PlayerGrounded, PlayerMovementInputConfig, PlayerMovementStats};
+use game_shared::models::player::{
+    Player, PlayerGrounded, PlayerMovementInputConfig, PlayerMovementStats,
+};
 use std::time::Duration;
-use crate::player_logic::player_movement::is_binding_pressed;
 
 const ANIMATION_KEY_IDLE: &str = "idle";
 const ANIMATION_KEY_IDLE_ALT: &str = "idle-02";
@@ -74,7 +76,9 @@ pub fn setup_character_animation(
             match key {
                 ANIMATION_KEY_IDLE if nodes.idle.is_none() => nodes.idle = Some(index),
                 ANIMATION_KEY_IDLE_ALT if nodes.idle_alt.is_none() => nodes.idle_alt = Some(index),
-                ANIMATION_KEY_SLOW_WALK if nodes.slow_walk.is_none() => nodes.slow_walk = Some(index),
+                ANIMATION_KEY_SLOW_WALK if nodes.slow_walk.is_none() => {
+                    nodes.slow_walk = Some(index)
+                }
                 ANIMATION_KEY_WALK if nodes.walk.is_none() => nodes.walk = Some(index),
                 ANIMATION_KEY_SPRINT if nodes.sprint.is_none() => nodes.sprint = Some(index),
                 ANIMATION_KEY_JUMP if nodes.jump.is_none() => nodes.jump = Some(index),
@@ -204,7 +208,9 @@ pub fn update_character_animation_state(
         })
         .unwrap_or((Vec3::ZERO, CharacterAnimationState::Idle));
 
-    for (mut controller, transform, velocity, movement_stats, is_grounded, is_player) in &mut character_query {
+    for (mut controller, transform, velocity, movement_stats, is_grounded, is_player) in
+        &mut character_query
+    {
         let horizontal_speed = Vec2::new(velocity.x, velocity.z).length();
         let target_state = if is_player {
             resolve_player_animation_state(
@@ -406,7 +412,10 @@ fn animation_speed_for_state(state: CharacterAnimationState) -> f32 {
     }
 }
 
-fn companion_playback_speed_for_state(state: CharacterAnimationState, horizontal_speed: f32) -> f32 {
+fn companion_playback_speed_for_state(
+    state: CharacterAnimationState,
+    horizontal_speed: f32,
+) -> f32 {
     let base_speed = match state {
         CharacterAnimationState::SlowWalk => 2.4,
         CharacterAnimationState::Walk => 5.2,

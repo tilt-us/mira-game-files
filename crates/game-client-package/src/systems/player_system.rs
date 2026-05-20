@@ -3,8 +3,13 @@ use bevy::prelude::*;
 use game_shared::config::ClientConfigs;
 use game_shared::models::http::account::AccountResource;
 use game_shared::models::player::{PlayerMovementInputConfig, PlayerPartyInputConfig};
+use logic_module::camera_logic::camera_follow::follow_player_orbit_camera;
 use logic_module::player_logic::character_animation::{
     setup_character_animation, update_character_animation_state,
+};
+use logic_module::player_logic::character_occlusion::{
+    apply_character_occlusion_material_alpha, attach_occlusion_material_owners,
+    bind_occlusion_material_instances, update_character_occlusion_targets,
 };
 use logic_module::player_logic::player_load::gen_player_from_response;
 use logic_module::player_logic::player_movement::{
@@ -74,6 +79,21 @@ impl Plugin for PlayerSystemComponent {
                 .after(setup_character_animation)
                 .run_if(in_state(ClientState::WindowVisible))
                 .run_if(resource_exists::<PlayerMovementInputConfig>),
+        );
+
+        app.add_systems(
+            Update,
+            (
+                attach_occlusion_material_owners,
+                bind_occlusion_material_instances.after(attach_occlusion_material_owners),
+                update_character_occlusion_targets
+                    .after(party_companion_follow)
+                    .after(follow_player_orbit_camera),
+                apply_character_occlusion_material_alpha
+                    .after(update_character_occlusion_targets)
+                    .after(bind_occlusion_material_instances),
+            )
+                .run_if(in_state(ClientState::WindowVisible)),
         );
     }
 }
