@@ -73,7 +73,7 @@ version = "1.0.149"
 
 # Dependency for runtime system information (CPU/process).
 [workspace.dependencies.sysinfo]
-version = "0.37.2"
+version = "0.39.2"
 
 # UI framework. create ui from HTML and CSS
 [workspace.dependencies.bevy_extended_ui]
