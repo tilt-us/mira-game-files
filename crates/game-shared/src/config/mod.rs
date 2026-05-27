@@ -537,6 +537,11 @@ impl InputConfig {
         &self.open_menu
     }
 
+    /// Returns the binding used for toggling the system info screen.
+    pub fn system_info_screen(&self) -> &str {
+        &self.system_info_screen
+    }
+
     /// Returns horizontal mouse sensitivity.
     pub fn mouse_sensitivity_horizontal(&self) -> f32 {
         self.mouse_sensitivity_horizontal

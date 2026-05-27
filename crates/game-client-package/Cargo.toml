@@ -20,8 +20,18 @@ path = "../module/world-module"
 workspace = true
 features = [
     "bevy_state",
-    "bevy_window"
+    "bevy_window",
+    "bevy_asset"
 ]
 
+[dependencies.bevy_extended_ui]
+workspace = true
+
+[dependencies.bevy_extended_ui_macros]
+workspace = true
+
 [dependencies.avian3d]
+workspace = true
+
+[dependencies.sysinfo]
 workspace = true

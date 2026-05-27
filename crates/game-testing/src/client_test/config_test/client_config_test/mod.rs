@@ -71,6 +71,7 @@ fn ensure_config_files_exists_creates_default_toml_files() {
         assert_eq!(loaded.config_input.party_slot_03(), "3");
         assert_eq!(loaded.config_input.party_slot_04(), "4");
         assert_eq!(loaded.config_input.party_next_slot(), "Q");
+        assert_eq!(loaded.config_input.system_info_screen(), "F3");
     });
 }
 
@@ -115,5 +116,6 @@ fn load_reads_typed_config_file() {
         assert_eq!(graphics.window_height, 720);
         assert_eq!(input.party_slot_01(), "1");
         assert_eq!(input.party_next_slot(), "Q");
+        assert_eq!(input.system_info_screen(), "F3");
     });
 }
